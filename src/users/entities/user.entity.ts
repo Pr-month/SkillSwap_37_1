@@ -2,13 +2,13 @@ import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 export enum UserRole {
   USER = 'USER',
-  ADMIN = 'ADMIN'
+  ADMIN = 'ADMIN',
 }
 
 export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
-  OTHER = 'other'
+  OTHER = 'other',
 }
 
 @Entity('users')
@@ -37,7 +37,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: Gender,
-    nullable: true
+    nullable: true,
   })
   gender: Gender;
 
@@ -56,7 +56,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.USER
+    default: UserRole.USER,
   })
   role: UserRole;
 
