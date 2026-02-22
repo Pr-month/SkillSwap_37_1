@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { appConfig } from './config/app.config';
+import { jwtConfig, TJwtConfig } from './config/jwt.config';
 import { AppDataSource } from './config/ormconfig';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,23 +14,25 @@ import { UsersModule } from './users/users.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig],
+      load: [appConfig, jwtConfig],
     }),
+
     TypeOrmModule.forRoot(AppDataSource.options),
+
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const appConfig = configService.get('APP_CONFIG');
+      inject: [jwtConfig.KEY],
+      useFactory: (jwtConfig: TJwtConfig) => {
         return {
-          secret: appConfig.jwt.secret,
+          secret: jwtConfig.secret,
           signOptions: {
-            expiresIn: appConfig.jwt.expiresIn,
+            expiresIn: jwtConfig.expiresIn,
           },
         };
       },
     }),
+
     AuthModule,
     UsersModule,
   ],
