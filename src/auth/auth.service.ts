@@ -12,8 +12,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     @Inject(appConfig.KEY)
     private readonly appConfig: AppConfig,
-  ) {
-  }
+  ) {}
 
   create(createAuthDto: CreateAuthDto) {
     return 'This action adds a new auth';
@@ -39,19 +38,17 @@ export class AuthService {
     try {
       const salt = this.appConfig.hashSalt;
 
-      const hashedPassword = await bcrypt.hash(
-        registerDto.password,
-        salt,
-      );
+      const hashedPassword = await bcrypt.hash(registerDto.password, salt);
 
       return await this.usersService.create({
         ...registerDto,
         password: hashedPassword,
       });
-
     } catch (error) {
       if (error.code === '23505') {
-        throw new ConflictException('Пользователь с таким email уже существует');
+        throw new ConflictException(
+          'Пользователь с таким email уже существует',
+        );
       }
 
       throw error;

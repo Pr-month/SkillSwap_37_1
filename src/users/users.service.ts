@@ -10,8 +10,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {
-  }
+  ) {}
 
   create(createUserDto: CreateUserDto) {
     const user = this.usersRepository.create(createUserDto);
@@ -33,5 +32,4 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
-
 }
