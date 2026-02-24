@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 
 import { dbConfig, DbConfig } from './config/ormconfig';
+import { StringValue } from 'ms';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { dbConfig, DbConfig } from './config/ormconfig';
         return {
           secret: jwtConfig.secret,
           signOptions: {
-            expiresIn: jwtConfig.expiresIn,
+            expiresIn: jwtConfig.expiresIn as StringValue,
           },
         };
       },
