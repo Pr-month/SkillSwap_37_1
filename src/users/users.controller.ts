@@ -14,6 +14,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthRequest } from '../auth/types/auth.types';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('users')
 export class UsersController {
@@ -25,16 +27,24 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
+  findAll(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
   }
 
-  @Patch('me')
+  @Get('me')
   @UseGuards(JwtAuthGuard)
-  async updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-    const updatedUser = await this.usersService.update(req.user.id, updateUserDto);
-    const { password, refreshToken, ...result } = updatedUser;
+  async getMe(@Request() req: AuthRequest) {
+    const user = await this.usersService.findById(req.user.id);
+    const { password, refreshToken, ...result } = user;
     return result;
+  }
+  
+    @Patch('me')
+    @UseGuards(JwtAuthGuard)
+    async updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+      const updatedUser = await this.usersService.update(req.user.id, updateUserDto);
+      const { password, refreshToken, ...result } = updatedUser;
+      return result;
   }
 
   @Get(':id')
