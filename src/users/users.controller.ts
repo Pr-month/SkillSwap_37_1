@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -36,6 +37,14 @@ export class UsersController {
     const user = await this.usersService.findById(req.user.id);
     const { password, refreshToken, ...result } = user;
     return result;
+  }
+  
+    @Patch('me')
+    @UseGuards(JwtAuthGuard)
+    async updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+      const updatedUser = await this.usersService.update(req.user.id, updateUserDto);
+      const { password, refreshToken, ...result } = updatedUser;
+      return result;
   }
 
   @Get(':id')
