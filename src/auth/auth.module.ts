@@ -7,9 +7,9 @@ import { RefreshStrategy } from './strategies/refresh.strategy';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [UsersModule, PassportModule],
+  imports: [UsersModule, PassportModule.register({ defaultStrategy: 'jwt' })],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshStrategy],
-  exports: [JwtStrategy, RefreshStrategy],
+  exports: [JwtStrategy, RefreshStrategy, PassportModule],
 })
 export class AuthModule {}
