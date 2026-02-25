@@ -7,6 +7,10 @@ export type JwtPayload = {
   role: UserRole;
 };
 
+export type RefreshPayload = {
+  sub: string;
+};
+
 export type AuthRequest = Request & {
   user: JwtPayload;
 };

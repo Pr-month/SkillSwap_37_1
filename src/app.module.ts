@@ -23,7 +23,7 @@ import { StringValue } from 'ms';
       inject: [dbConfig.KEY],
       useFactory: (db: DbConfig) => ({ ...db }),
     }),
-    
+
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],
