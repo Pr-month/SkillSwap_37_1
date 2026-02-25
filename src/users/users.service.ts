@@ -34,6 +34,10 @@ export class UsersService {
     });
   }
 
+  async findById(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id } });
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} user`;
   }
