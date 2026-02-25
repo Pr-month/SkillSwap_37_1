@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Controller,
   Get,
@@ -19,7 +18,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -34,28 +33,33 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: AuthRequest) {
-    const user = await this.usersService.findById(req.user.id);
+    const user = await this.usersService.findById(req.user.sub);
+    if (!user) {
+      return null;
+    }
     const { password, refreshToken, ...result } = user;
     return result;
   }
-  
-    @Patch('me')
-    @UseGuards(JwtAuthGuard)
-    async updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
-      const updatedUser = await this.usersService.update(req.user.id, updateUserDto);
-      const { password, refreshToken, ...result } = updatedUser;
-      return result;
+
+  @Patch('me')
+  @UseGuards(JwtAuthGuard)
+  async updateMe(@Request() req: AuthRequest, @Body() updateUserDto: UpdateUserDto) {
+    const updatedUser = await this.usersService.update(
+      req.user.sub,
+      updateUserDto,
+    );
+    if (!updatedUser) {
+      return null;
+    }
+    const { password, refreshToken, ...result } = updatedUser;
+    return result;
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

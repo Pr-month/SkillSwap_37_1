@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -35,12 +34,8 @@ export class UsersService {
     });
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findOne(id: string) {
     return this.usersRepository.findOne({ where: { id } });
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -58,11 +53,11 @@ export class UsersService {
     await this.usersRepository.update(userId, { refreshToken });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.update(id, updateUserDto);
     return this.findOne(id);
   }
-  
+
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
