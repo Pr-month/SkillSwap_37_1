@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -56,6 +57,38 @@ export class UsersController {
     }
     const { password, refreshToken, ...result } = updatedUser;
     return result;
+  }
+
+  @Patch('me/password')
+  @UseGuards(JwtAuthGuard)
+  async changeMyPassword(
+    @Request() req: AuthRequest,
+    @Body() body: { 
+      currentPassword: string; 
+      newPassword: string; 
+      confirmPassword: string;
+    },
+  ) {
+    const { currentPassword, newPassword, confirmPassword } = body;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return null;
+    }
+
+    if (newPassword !== confirmPassword) {
+      return null;
+    }
+
+    const user = await this.usersService.findById(req.user.sub);
+    if (!user) {
+      return null;
+    }
+
+    return this.usersService.changePassword(
+      user, 
+      currentPassword, 
+      newPassword
+    );
   }
 
   @Get(':id')

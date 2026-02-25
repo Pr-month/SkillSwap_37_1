@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -56,6 +56,33 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.update(id, updateUserDto);
     return this.findOne(id);
+  }
+
+  async changePassword(id: string, currentPassword: string, newPassword: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      select: ['id', 'password']
+    });
+    
+    // Проверяем текущий пароль
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      // выставлять ошибку или использовать return null
+      throw new UnauthorizedException('Неверный текущий пароль');
+    }
+
+    // Хешируем новый пароль
+    const hashedPassword = await bcrypt.hash(newPassword, this.appConfig.hashSalt);
+
+    // Обновляем пароль
+    await this.usersRepository.update(id, {
+      password: hashedPassword 
+    });
+
+    return {
+      success: true,
+      message: 'Пароль успешно изменен'
+    };
   }
 
   remove(id: number) {
