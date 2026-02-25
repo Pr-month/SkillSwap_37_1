@@ -18,7 +18,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -43,7 +43,10 @@ export class UsersController {
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
-  async updateMe(@Request() req: AuthRequest, @Body() updateUserDto: UpdateUserDto) {
+  async updateMe(
+    @Request() req: AuthRequest,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     const updatedUser = await this.usersService.update(
       req.user.sub,
       updateUserDto,
@@ -59,7 +62,6 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
-
 
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -11,6 +11,7 @@ import { UsersModule } from './users/users.module';
 
 import { dbConfig, DbConfig } from './config/ormconfig';
 import { StringValue } from 'ms';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { StringValue } from 'ms';
     }),
     AuthModule,
     UsersModule,
+    SkillsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
