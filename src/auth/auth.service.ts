@@ -43,20 +43,31 @@ export class AuthService {
   async register(registerDto: RegisterDto) {
     try {
       const salt = this.appConfig.hashSalt;
-
       const hashedPassword = await bcrypt.hash(registerDto.password, salt);
 
-      return await this.usersService.create({
+      const newUser = await this.usersService.create({
         ...registerDto,
         password: hashedPassword,
       });
+
+      const tokens = await this.generateTokens({
+        id: newUser.id,
+        email: newUser.email,
+        role: newUser.role,
+      });
+
+      const { password, ...userWithoutPassword } = newUser;
+
+      return {
+        user: userWithoutPassword,
+        ...tokens,
+      };
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(
           'Пользователь с таким email уже существует',
         );
       }
-
       throw error;
     }
   }
