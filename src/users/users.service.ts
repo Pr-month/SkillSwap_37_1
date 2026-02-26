@@ -19,19 +19,7 @@ export class UsersService {
   }
 
   findAll(): Promise<UserResponseDto[]> {
-    return this.usersRepository.find({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        about: true,
-        birthdate: true,
-        city: true,
-        gender: true,
-        avatar: true,
-        role: true,
-      },
-    });
+    return this.usersRepository.find();
   }
 
   async findOne(id: string) {
@@ -40,10 +28,6 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
-  }
-
-  async findById(id: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { id } });
   }
 
   async updateRefreshToken(
