@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Skill } from '../../skills/entities/skill.entity';
 
 export enum UserRole {
   USER = 'USER',
@@ -44,14 +45,14 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  // @Column('simple-array', { nullable: true })
-  // skills: string[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  skills: Skill[];
 
   // @Column('simple-array', { nullable: true })
   // wantToLearn: string[];
 
-  // @Column('simple-array', { nullable: true })
-  // favoriteSkills: string[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  favoriteSkills: Skill[];
 
   @Column({
     type: 'enum',
