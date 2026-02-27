@@ -56,10 +56,8 @@ export class AuthService {
         role: newUser.role,
       });
 
-      const { password, ...userWithoutPassword } = newUser;
-
       return {
-        user: userWithoutPassword,
+        user: newUser,
         ...tokens,
       };
     } catch (error) {
