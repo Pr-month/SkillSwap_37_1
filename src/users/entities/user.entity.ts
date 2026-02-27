@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  JoinTable, ManyToMany,
+} from 'typeorm';
 import { Skill } from '../../skills/entities/skill.entity';
 
 export enum UserRole {
@@ -51,7 +57,10 @@ export class User {
   // @Column('simple-array', { nullable: true })
   // wantToLearn: string[];
 
-  @OneToMany(() => Skill, (skill) => skill.owner)
+  @ManyToMany(() => Skill, (skill) => skill.favoritedBy)
+  @JoinTable({
+    name: 'user_favorite_skills',
+  })
   favoriteSkills: Skill[];
 
   @Column({
