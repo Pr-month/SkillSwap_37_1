@@ -5,26 +5,9 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshStrategy } from './strategies/refresh.strategy';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule } from '@nestjs/config';
-import { jwtConfig, TJwtConfig } from '../config/jwt.config';
-import { StringValue } from 'ms';
 
 @Module({
-  imports: [
-    UsersModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [jwtConfig.KEY],
-      useFactory: (config: TJwtConfig) => ({
-        secret: config.secret,
-        signOptions: {
-          expiresIn: config.expiresIn as StringValue,
-        },
-      }),
-    }),
-  ],
+  imports: [UsersModule, PassportModule.register({ defaultStrategy: 'jwt' })],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RefreshStrategy],
   exports: [JwtStrategy, RefreshStrategy, PassportModule, AuthService],
