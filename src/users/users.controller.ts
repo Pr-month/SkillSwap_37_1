@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   Request,
-  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,6 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRequest } from '../auth/types/auth.types';
 import { UserResponseDto } from './dto/user-response.dto';
+import { ChangePasswordDto } from './dto/user-change-password.dto';
 
 @Controller('users')
 export class UsersController {
@@ -63,31 +63,12 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async changeMyPassword(
     @Request() req: AuthRequest,
-    @Body() body: { 
-      currentPassword: string; 
-      newPassword: string; 
-      confirmPassword: string;
-    },
+    @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    const { currentPassword, newPassword, confirmPassword } = body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return null;
-    }
-
-    if (newPassword !== confirmPassword) {
-      return null;
-    }
-
-    const user = await this.usersService.findById(req.user.sub);
-    if (!user) {
-      return null;
-    }
-
     return this.usersService.changePassword(
-      user, 
-      currentPassword, 
-      newPassword
+      req.user.sub,
+      changePasswordDto.currentPassword,
+      changePasswordDto.newPassword,
     );
   }
 

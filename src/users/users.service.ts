@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -58,30 +58,51 @@ export class UsersService {
     return this.findOne(id);
   }
 
-  async changePassword(id: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    id: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    // Валидация
+    if (!currentPassword || !newPassword) {
+      throw new BadRequestException('Текущий и новый пароль обязательны');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('Новый пароль должен отличаться от текущего');
+    }
     const user = await this.usersRepository.findOne({
       where: { id },
-      select: ['id', 'password']
+      select: ['id', 'password'],
     });
-    
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
     // Проверяем текущий пароль
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isPasswordValid) {
-      // выставлять ошибку или использовать return null
       throw new UnauthorizedException('Неверный текущий пароль');
     }
 
     // Хешируем новый пароль
-    const hashedPassword = await bcrypt.hash(newPassword, this.appConfig.hashSalt);
+    const hashedPassword = await bcrypt.hash(
+      newPassword,
+      this.appConfig.hashSalt,
+    );
 
     // Обновляем пароль
     await this.usersRepository.update(id, {
-      password: hashedPassword 
+      password: hashedPassword,
     });
 
     return {
       success: true,
-      message: 'Пароль успешно изменен'
+      message: 'Пароль успешно изменен',
     };
   }
 
