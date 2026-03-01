@@ -5,7 +5,7 @@ import {
   IsEnum,
   IsDateString,
 } from 'class-validator';
-import { Gender } from '../../users/entities/user.entity';
+import { Gender } from 'src/users/entities/user.enums';
 
 export class RegisterDto {
   @IsString()
