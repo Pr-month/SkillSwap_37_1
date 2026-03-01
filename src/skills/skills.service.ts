@@ -9,19 +9,24 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class SkillsService {
-  constructor(@InjectRepository(Skill) private readonly skillsRespository: Repository<Skill>) {
+  constructor(
+    @InjectRepository(Skill)
+    private readonly skillsRespository: Repository<Skill>,
+  ) {
   }
 
   create(createSkillDto: CreateSkillDto) {
     return 'This action adds a new skill';
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<PaginatedSkillsResultDto> {
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedSkillsResultDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
 
     const query = this.skillsRespository
       .createQueryBuilder('skill')
-      .orderBy('skill.createdAt', 'DESC');
+      .orderBy('skill.title', 'DESC');
 
     const [skills, totalCount] = await query
       .skip(skippedItems)

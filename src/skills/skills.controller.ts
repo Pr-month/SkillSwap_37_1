@@ -5,7 +5,8 @@ import {
   Body,
   Patch,
   Param,
-  Delete, Query,
+  Delete,
+  Query,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
@@ -15,8 +16,7 @@ import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
 
 @Controller('skills')
 export class SkillsController {
-  constructor(private readonly skillsService: SkillsService) {
-  }
+  constructor(private readonly skillsService: SkillsService) {}
 
   @Post()
   create(@Body() createSkillDto: CreateSkillDto) {
@@ -24,7 +24,9 @@ export class SkillsController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto): Promise<PaginatedSkillsResultDto> {
+  findAll(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedSkillsResultDto> {
     return this.skillsService.findAll({
       ...paginationDto,
       limit: paginationDto.limit > 10 ? 10 : paginationDto.limit,
