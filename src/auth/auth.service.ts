@@ -1,5 +1,6 @@
 
 import {
+  ConflictException,
   Inject,
   Injectable,
   UnauthorizedException
@@ -13,6 +14,7 @@ import { jwtConfig, TJwtConfig } from '../config/jwt.config';
 import { JwtPayload, RefreshPayload } from './types/auth.types';
 import * as bcrypt from 'bcrypt';
 import { StringValue } from 'ms';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -35,11 +37,7 @@ export class AuthService {
         password: hashedPassword,
       });
 
-      const tokens = await this.generateTokens({
-        id: newUser.id,
-        email: newUser.email,
-        role: newUser.role,
-      });
+      const tokens = await this.generateTokens(newUser);
 
       return {
         user: newUser,
