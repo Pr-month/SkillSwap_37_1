@@ -1,6 +1,28 @@
+<<<<<<< week2-metaksander-entity_skills
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  JoinTable, ManyToMany,
+} from 'typeorm';
+import { Skill } from '../../skills/entities/skill.entity';
+
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+  OTHER = 'other',
+}
+=======
 import { Exclude } from 'class-transformer';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { Gender, UserRole } from './user.enums';
+>>>>>>> week2
 
 @Entity('users')
 export class User {
@@ -36,14 +58,17 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  // @Column('simple-array', { nullable: true })
-  // skills: string[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  skills: Skill[];
 
   // @Column('simple-array', { nullable: true })
   // wantToLearn: string[];
 
-  // @Column('simple-array', { nullable: true })
-  // favoriteSkills: string[];
+  @ManyToMany(() => Skill, (skill) => skill.favoritedBy)
+  @JoinTable({
+    name: 'user_favorite_skills',
+  })
+  favoriteSkills: Skill[];
 
   @Column({
     type: 'enum',
