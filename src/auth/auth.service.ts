@@ -13,11 +13,6 @@ import { jwtConfig, TJwtConfig } from '../config/jwt.config';
 import { JwtPayload, RefreshPayload } from './types/auth.types';
 import * as bcrypt from 'bcrypt';
 import { StringValue } from 'ms';
-import * as bcrypt from 'bcrypt';
-import { appConfig, AppConfig } from '../config/app.config';
-import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
