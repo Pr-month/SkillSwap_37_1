@@ -26,13 +26,33 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const salt = this.appConfig.hashSalt;
-    const hashedPassword = await bcrypt.hash(registerDto.password, salt);
+    try {
+      const salt = this.appConfig.hashSalt;
+      const hashedPassword = await bcrypt.hash(registerDto.password, salt);
 
-    return this.usersService.create({
-      ...registerDto,
-      password: hashedPassword,
-    });
+      const newUser = await this.usersService.create({
+        ...registerDto,
+        password: hashedPassword,
+      });
+
+      const tokens = await this.generateTokens({
+        id: newUser.id,
+        email: newUser.email,
+        role: newUser.role,
+      });
+
+      return {
+        user: newUser,
+        ...tokens,
+      };
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(
+          'Пользователь с таким email уже существует',
+        );
+      }
+      throw error;
+    }
   }
 
   async login(loginDto: LoginDto) {
