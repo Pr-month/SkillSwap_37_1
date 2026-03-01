@@ -98,4 +98,8 @@ export class AuthService {
       refreshToken,
     };
   }
+
+  async logout(userId: string): Promise<void> {
+    await this.usersService.updateRefreshToken(userId, null);
+  }
 }
