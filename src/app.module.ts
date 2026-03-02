@@ -8,12 +8,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 import { dbConfig, DbConfig } from './config/ormconfig';
 import { StringValue } from 'ms';
+import { SkillsModule } from './skills/skills.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public',
+    }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       load: [appConfig, jwtConfig, dbConfig],
@@ -37,8 +46,11 @@ import { StringValue } from 'ms';
         };
       },
     }),
+
     AuthModule,
     UsersModule,
+    SkillsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

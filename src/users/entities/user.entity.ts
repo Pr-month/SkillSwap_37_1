@@ -1,15 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-
-export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-}
-
-export enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
-  OTHER = 'other',
-}
+import { Exclude } from 'class-transformer';
+import { Skill } from 'src/skills/entities/skill.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Gender, UserRole } from './user.enums';
 
 @Entity('users')
 export class User {
@@ -22,6 +21,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @Exclude()
   @Column()
   password: string;
 
@@ -44,14 +44,17 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  // @Column('simple-array', { nullable: true })
-  // skills: string[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  skills: Skill[];
 
   // @Column('simple-array', { nullable: true })
   // wantToLearn: string[];
 
-  // @Column('simple-array', { nullable: true })
-  // favoriteSkills: string[];
+  @ManyToMany(() => Skill, (skill) => skill.favoritedBy)
+  @JoinTable({
+    name: 'user_favorite_skills',
+  })
+  favoriteSkills: Skill[];
 
   @Column({
     type: 'enum',
@@ -60,6 +63,7 @@ export class User {
   })
   role: UserRole;
 
+  @Exclude()
   @Column({ type: 'varchar', nullable: true })
   refreshToken: string | null;
 }
