@@ -34,12 +34,7 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: AuthRequest) {
-    const user = await this.usersService.findOne(req.user.sub);
-    if (!user) {
-      return null;
-    }
-    const { password, refreshToken, ...result } = user;
-    return result;
+    return this.usersService.findOne(req.user.sub);
   }
 
   @Patch('me')
