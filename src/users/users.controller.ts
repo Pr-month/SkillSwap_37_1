@@ -48,15 +48,7 @@ export class UsersController {
     @Request() req: AuthRequest,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const updatedUser = await this.usersService.update(
-      req.user.sub,
-      updateUserDto,
-    );
-    if (!updatedUser) {
-      return null;
-    }
-    const { password, refreshToken, ...result } = updatedUser;
-    return result;
+    return this.usersService.update(req.user.sub, updateUserDto);
   }
 
   @Patch('me/password')
