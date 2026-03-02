@@ -15,6 +15,7 @@ import { dbConfig, DbConfig } from './config/ormconfig';
 import { StringValue } from 'ms';
 import { SkillsModule } from './skills/skills.module';
 import { FilesModule } from './files/files.module';
+import { RequestsModule } from './requests/requests.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { FilesModule } from './files/files.module';
     UsersModule,
     SkillsModule,
     FilesModule,
+    RequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
