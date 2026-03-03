@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { PaginationDto } from './dto/pagination.dto';
@@ -23,15 +23,29 @@ export class SkillsService {
     paginationDto: PaginationDto,
   ): Promise<PaginatedSkillsResultDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
+    const { page, limit, search } = paginationDto;
 
     const query = this.skillsRespository
-      .createQueryBuilder('skill')
-      .orderBy('skill.title', 'DESC');
+      .createQueryBuilder('skill');
+
+    if (search) {
+      query.where('skill.title ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    query.orderBy('skill.title', 'DESC');
 
     const [skills, totalCount] = await query
       .skip(skippedItems)
       .take(paginationDto.limit)
       .getManyAndCount();
+
+    const lastPage = Math.ceil(totalCount / limit);
+
+    if (page > lastPage) {
+      throw new NotFoundException(`Страница ${page} не найдена. Всего страниц: ${lastPage}`);
+    }
 
     return {
       totalCount,
