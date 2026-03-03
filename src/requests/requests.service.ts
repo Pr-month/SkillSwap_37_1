@@ -1,11 +1,89 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { Request } from './entities/request.entity';
+import { Skill } from 'src/skills/entities/skill.entity';
+import { User } from 'src/users/entities/user.entity';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 @Injectable()
 export class RequestsService {
-  create(createRequestDto: CreateRequestDto) {
-    return 'This action adds a new request';
+  constructor(
+    @InjectRepository(Request)
+    private readonly requestsRepository: Repository<Request>,
+    @InjectRepository(Skill)
+    private readonly skillsRepository: Repository<Skill>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async create(senderId: string, dto: CreateRequestDto) {
+    const sender = await this.usersRepository.findOne({
+      where: { id: senderId },
+    });
+
+    if (!sender) {
+      throw new NotFoundException(ERROR_MESSAGES.USER_NOT_FOUND);
+    }
+
+    const requestedSkill = await this.skillsRepository.findOne({
+      where: { id: dto.requestedSkillId },
+      relations: { owner: true },
+    });
+
+    if (!requestedSkill) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUESTED_SKILL_NOT_FOUND);
+    }
+
+    const offeredSkill = await this.skillsRepository.findOne({
+      where: { id: dto.offeredSkillId },
+      relations: { owner: true },
+    });
+
+    if (!offeredSkill) {
+      throw new NotFoundException(ERROR_MESSAGES.OFFERED_SKILL_NOT_FOUND);
+    }
+
+    if (!offeredSkill.owner || offeredSkill.owner.id !== senderId) {
+      throw new ForbiddenException(ERROR_MESSAGES.OFFERED_SKILL_NOT_OWNED);
+    }
+
+    const receiver = requestedSkill.owner;
+    if (!receiver) {
+      throw new BadRequestException(
+        ERROR_MESSAGES.REQUESTED_SKILL_OWNER_MISSING,
+      );
+    }
+
+    if (receiver.id === senderId) {
+      throw new BadRequestException(ERROR_MESSAGES.CANNOT_SEND_REQUEST_TO_SELF);
+    }
+
+    const request = this.requestsRepository.create({
+      sender,
+      receiver,
+      offeredSkill,
+      requestedSkill,
+    });
+
+    const saved = await this.requestsRepository.save(request);
+
+    return this.requestsRepository.findOne({
+      where: { id: saved.id },
+      relations: {
+        sender: true,
+        receiver: true,
+        offeredSkill: true,
+        requestedSkill: true,
+      },
+    });
   }
 
   findAll() {
