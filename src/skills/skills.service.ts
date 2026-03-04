@@ -1,22 +1,23 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { Skill } from './entities/skill.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Skill } from './entities/skill.entity';
-import { Repository } from 'typeorm';
+
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
-    private readonly skillsRespository: Repository<Skill>,
-  ) {
-  }
+    private readonly skillsRepository: Repository<Skill>,
+  ) {}
 
-  create(createSkillDto: CreateSkillDto) {
-    return 'This action adds a new skill';
+  create(createSkillDto: CreateSkillDto): Promise<Skill> {
+    const skill = this.skillsRepository.create(createSkillDto as Partial<Skill>);
+    return this.skillsRepository.save(skill);
   }
 
   async findAll(
@@ -25,7 +26,7 @@ export class SkillsService {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
-    const query = this.skillsRespository
+    const query = this.skillsRepository
       .createQueryBuilder('skill');
 
     if (search) {
