@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -57,7 +63,9 @@ export class UsersService {
     }
 
     if (currentPassword === newPassword) {
-      throw new BadRequestException('Новый пароль должен отличаться от текущего');
+      throw new BadRequestException(
+        'Новый пароль должен отличаться от текущего',
+      );
     }
     const user = await this.usersRepository.findOne({
       where: { id },
