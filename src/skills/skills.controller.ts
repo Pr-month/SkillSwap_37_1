@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
 
 @Controller('skills')
 export class SkillsController {
@@ -21,8 +24,13 @@ export class SkillsController {
   }
 
   @Get()
-  findAll() {
-    return this.skillsService.findAll();
+  findAll(
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedSkillsResultDto> {
+    return this.skillsService.findAll({
+      ...paginationDto,
+      limit: paginationDto.limit > 10 ? 10 : paginationDto.limit,
+    });
   }
 
   @Get(':id')

@@ -1,7 +1,14 @@
-import { Exclude } from "class-transformer";
-import { Skill } from "src/skills/entities/skill.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from "typeorm";
-import { Gender, UserRole } from "./user.enums";
+import { Exclude } from 'class-transformer';
+import { Skill } from 'src/skills/entities/skill.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Gender, UserRole } from './user.enums';
 
 @Entity('users')
 export class User {

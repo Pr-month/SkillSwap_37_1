@@ -4,6 +4,14 @@ import { Repository } from 'typeorm';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateSkillDto } from './dto/create-skill.dto';
+import { UpdateSkillDto } from './dto/update-skill.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Skill } from './entities/skill.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SkillsService {
@@ -17,8 +25,40 @@ export class SkillsService {
     return this.skillsRepository.save(skill);
   }
 
-  findAll() {
-    return `This action returns all skills`;
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedSkillsResultDto> {
+    const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
+    const { page, limit, search } = paginationDto;
+
+    const query = this.skillsRespository
+      .createQueryBuilder('skill');
+
+    if (search) {
+      query.where('skill.title ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    query.orderBy('skill.title', 'DESC');
+
+    const [skills, totalCount] = await query
+      .skip(skippedItems)
+      .take(paginationDto.limit)
+      .getManyAndCount();
+
+    const lastPage = Math.ceil(totalCount / limit);
+
+    if (page > lastPage) {
+      throw new NotFoundException(`Страница ${page} не найдена. Всего страниц: ${lastPage}`);
+    }
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      data: skills,
+    };
   }
 
   findOne(id: number) {
