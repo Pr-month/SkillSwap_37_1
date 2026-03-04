@@ -12,6 +12,7 @@ import { Request } from './entities/request.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
+import { UserRole } from 'src/users/entities/user.enums';
 
 @Injectable()
 export class RequestsService {
@@ -98,7 +99,23 @@ export class RequestsService {
     return `This action updates a #${id} request`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} request`;
+  async remove(id: string, actorId: string, actorRole: UserRole) {
+    const request = await this.requestsRepository.findOne({
+      where: { id },
+      relations: { sender: true },
+    });
+
+    if (!request) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUEST_NOT_FOUND);
+    }
+
+    const isAdmin = actorRole === UserRole.ADMIN;
+    if (!isAdmin && request.sender?.id !== actorId) {
+      throw new ForbiddenException(ERROR_MESSAGES.REQUEST_DELETE_ONLY_OUTGOING);
+    }
+
+    await this.requestsRepository.delete(id);
+
+    return { id };
   }
 }

@@ -9,4 +9,6 @@ export const ERROR_MESSAGES = {
   REQUESTED_SKILL_OWNER_MISSING: 'У запрашиваемого навыка отсутствует владелец',
   OFFERED_SKILL_NOT_OWNED: 'Нельзя предлагать навык другого пользователя',
   CANNOT_SEND_REQUEST_TO_SELF: 'Нельзя отправить заявку самому себе',
+  REQUEST_NOT_FOUND: 'Заявка не найдена',
+  REQUEST_DELETE_ONLY_OUTGOING: 'Удалить можно только исходящую заявку',
 } as const;
