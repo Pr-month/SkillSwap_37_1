@@ -1,17 +1,12 @@
-import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateSkillDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Skill } from './entities/skill.entity';
-import { Repository } from 'typeorm';
+
 
 @Injectable()
 export class SkillsService {
@@ -31,7 +26,7 @@ export class SkillsService {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
-    const query = this.skillsRespository
+    const query = this.skillsRepository
       .createQueryBuilder('skill');
 
     if (search) {
