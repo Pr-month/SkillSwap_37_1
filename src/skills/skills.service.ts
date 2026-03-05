@@ -3,10 +3,13 @@ import { Repository } from 'typeorm';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
-
 
 @Injectable()
 export class SkillsService {
@@ -16,7 +19,9 @@ export class SkillsService {
   ) {}
 
   create(createSkillDto: CreateSkillDto): Promise<Skill> {
-    const skill = this.skillsRepository.create(createSkillDto as Partial<Skill>);
+    const skill = this.skillsRepository.create(
+      createSkillDto as Partial<Skill>,
+    );
     return this.skillsRepository.save(skill);
   }
 
@@ -26,8 +31,7 @@ export class SkillsService {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
-    const query = this.skillsRepository
-      .createQueryBuilder('skill');
+    const query = this.skillsRepository.createQueryBuilder('skill');
 
     if (search) {
       query.where('skill.title ILIKE :search', {
@@ -45,7 +49,9 @@ export class SkillsService {
     const lastPage = Math.ceil(totalCount / limit);
 
     if (page > lastPage) {
-      throw new NotFoundException(`Страница ${page} не найдена. Всего страниц: ${lastPage}`);
+      throw new NotFoundException(
+        `Страница ${page} не найдена. Всего страниц: ${lastPage}`,
+      );
     }
 
     return {
@@ -60,8 +66,26 @@ export class SkillsService {
     return `This action returns a #${id} skill`;
   }
 
-  update(id: number, updateSkillDto: UpdateSkillDto) {
-    return `This action updates a #${id} skill`;
+  async update(
+    id: string,
+    updateSkillDto: UpdateSkillDto,
+    userId: string,
+  ): Promise<Skill> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: ['owner'],
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Навык не найден');
+    }
+
+    if (!skill.owner || skill.owner.id !== userId) {
+      throw new ForbiddenException('Можно обновлять только свои навыки');
+    }
+
+    Object.assign(skill, updateSkillDto);
+    return this.skillsRepository.save(skill);
   }
 
   remove(id: number) {
