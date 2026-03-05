@@ -25,6 +25,12 @@ export class RequestsController {
     return this.requestsService.create(req.user.sub, dto);
   }
 
+  @Get('incoming')
+  @UseGuards(JwtAuthGuard)
+  getIncoming(@Request() req: AuthRequest) {
+    return this.requestsService.getIncoming(req.user.sub);
+  }
+
   @Get()
   findAll() {
     return this.requestsService.findAll();

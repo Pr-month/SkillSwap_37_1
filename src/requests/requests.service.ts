@@ -101,4 +101,17 @@ export class RequestsService {
   remove(id: number) {
     return `This action removes a #${id} request`;
   }
+
+  async getIncoming(userId: string): Promise<Request[]> {
+    return this.requestsRepository.find(
+      {
+      where: { receiver: { id: userId } },
+      relations: {
+        sender: true,
+        offeredSkill: true,
+        requestedSkill: true,
+      },
+    }
+    );
+  }
 }
