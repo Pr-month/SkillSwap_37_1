@@ -101,7 +101,7 @@ export class AuthService {
   async logout(userId: string): Promise<void> {
     await this.usersService.updateRefreshToken(userId, null);
   }
-  
+
   async refreshTokens(userId: string) {
     const user = await this.usersService.findOne(userId);
 

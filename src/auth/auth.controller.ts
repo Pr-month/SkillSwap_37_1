@@ -36,7 +36,7 @@ export class AuthController {
   logout(@Req() req: AuthRequest) {
     return this.authService.logout(req.user.sub);
   }
-  
+
   @Post('refresh')
   @UseGuards(RefreshAuthGuard)
   async refresh(@Request() req: AuthRequest) {

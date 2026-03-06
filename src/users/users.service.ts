@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -13,6 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig, AppConfig } from 'src/config/app.config';
+import { Skill } from 'src/skills/entities/skill.entity';
 
 @Injectable()
 export class UsersService {
@@ -107,6 +109,26 @@ export class UsersService {
       success: true,
       message: 'Пароль успешно изменен',
     };
+  }
+
+  async addFavoriteSkill(userId: string, skillId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['favoriteSkills'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    if (user.favoriteSkills.some((skill) => skill.id === skillId)) {
+      throw new ConflictException('Навык уже добавлен в избранное');
+    }
+
+    user.favoriteSkills.push({ id: skillId } as Skill);
+    await this.usersRepository.save(user);
+
+    return user;
   }
 
   remove(id: number) {
