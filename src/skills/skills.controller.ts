@@ -1,12 +1,13 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
+  Controller,
+  Delete,
+  Get,
   Patch,
   Param,
-  Delete,
+  Post,
   Query,
+  Req,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -15,8 +16,8 @@ import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { AuthRequest } from 'src/auth/types/auth.types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthRequest } from '../auth/types/auth.types';
 import { UsersService } from 'src/users/users.service';
 
 @Controller('skills')
@@ -64,8 +65,13 @@ export class SkillsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillsService.update(+id, updateSkillDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updateSkillDto: UpdateSkillDto,
+    @Req() req: AuthRequest,
+  ) {
+    return this.skillsService.update(id, updateSkillDto, req.user.sub);
   }
 
   @Delete(':id')
