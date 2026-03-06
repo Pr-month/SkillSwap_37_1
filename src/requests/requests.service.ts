@@ -118,4 +118,17 @@ export class RequestsService {
 
     return { id };
   }
+
+  async getIncoming(userId: string): Promise<Request[]> {
+    return this.requestsRepository.find(
+      {
+      where: { receiver: { id: userId } },
+      relations: {
+        sender: true,
+        offeredSkill: true,
+        requestedSkill: true,
+      },
+    }
+    );
+  }
 }
