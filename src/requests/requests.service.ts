@@ -23,7 +23,8 @@ export class RequestsService {
     private readonly skillsRepository: Repository<Skill>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+  ) {
+  }
 
   async create(senderId: string, dto: CreateRequestDto) {
     const sender = await this.usersRepository.findOne({
@@ -122,13 +123,26 @@ export class RequestsService {
   async getIncoming(userId: string): Promise<Request[]> {
     return this.requestsRepository.find(
       {
-      where: { receiver: { id: userId } },
+        where: { receiver: { id: userId } },
+        relations: {
+          sender: true,
+          offeredSkill: true,
+          requestedSkill: true,
+        },
+      },
+    );
+  }
+
+  async getOutgoing(userId: string) {
+    return this.requestsRepository.find({
+      where: {
+        sender: { id: userId },
+      },
       relations: {
-        sender: true,
+        receiver: true,
         offeredSkill: true,
         requestedSkill: true,
       },
-    }
-    );
+    });
   }
 }
