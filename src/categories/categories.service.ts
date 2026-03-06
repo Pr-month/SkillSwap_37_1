@@ -16,8 +16,18 @@ export class CategoriesService {
     return 'This action adds a new category';
   }
 
-  findAll(): Promise<Category[]> {
-    return this.categoriesRepository.find();
+  async findAll() {
+    const parentCategories = await this.categoriesRepository.find({
+      where: { parent: null },
+      relations: ['children'],
+    });
+
+    return parentCategories.map((category) => ({
+      name: category.name,
+      children: category.children.map((child) => ({
+        name: child.name,
+      })),
+    }));
   }
 
   findOne(id: number) {
