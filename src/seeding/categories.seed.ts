@@ -30,7 +30,7 @@ async function seedCategories() {
 
     const categoryRepo = AppDataSource.getRepository(Category);
 
-    console.log('🌱 Starting categories seeding...');
+    console.log('Starting categories seeding...');
 
     for (const group of CategoriesData) {
       // Создаём/находим родительскую категорию
