@@ -31,6 +31,12 @@ export class RequestsController {
     return this.requestsService.getIncoming(req.user.sub);
   }
 
+  @Get('outgoing')
+  @UseGuards(JwtAuthGuard)
+  getOutgoing(@Request() req: AuthRequest) {
+    return this.requestsService.getOutgoing(req.user.sub);
+  }
+
   @Get()
   findAll() {
     return this.requestsService.findAll();
