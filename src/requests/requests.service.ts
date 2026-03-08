@@ -7,12 +7,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 import { Request } from './entities/request.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { UserRole } from 'src/users/entities/user.enums';
+import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 
 @Injectable()
 export class RequestsService {
@@ -96,9 +96,9 @@ export class RequestsService {
     return `This action returns a #${id} request`;
   }
 
-  update(id: number, updateRequestDto: UpdateRequestDto) {
-    return `This action updates a #${id} request`;
-  }
+  // update(id: number, updateRequestDto: UpdateRequestDto) {
+  //   return `This action updates a #${id} request`;
+  // } как я понимаю, не потребуется больше
 
   async remove(id: string, actorId: string, actorRole: UserRole) {
     const request = await this.requestsRepository.findOne({
@@ -133,7 +133,7 @@ export class RequestsService {
     );
   }
 
-  async getOutgoing(userId: string) {
+  async getOutgoing(userId: string): Promise<Request[]>  {
     return this.requestsRepository.find({
       where: {
         sender: { id: userId },
@@ -144,5 +144,29 @@ export class RequestsService {
         requestedSkill: true,
       },
     });
+  }
+
+  async updateStatus(userId: string, dto: UpdateRequestStatusDto, id: string): Promise<Request> {
+   const request = await this.requestsRepository.findOne({
+      where:
+         { id },
+      relations: {
+        receiver: true,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUEST_NOT_FOUND);
+    }
+
+    if (request.receiver.id !== userId) {
+      throw new ForbiddenException(
+        ERROR_MESSAGES.REQUEST_UPDATE_ONLY_INCOMING,
+      );
+    }
+
+    request.status = dto.status;
+
+    return this.requestsRepository.save(request);
   }
 }
