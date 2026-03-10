@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 @Injectable()
@@ -13,13 +13,32 @@ export class CategoriesService {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    const { name, parentId } = createCategoryDto;
+
+    let parent: Category | null = null;
+
+    if (parentId) {
+      parent = await this.categoriesRepository.findOne({
+        where: { id: parentId },
+      });
+
+      if (!parent) {
+        throw new NotFoundException('Родительская категория не найдена');
+      }
+    }
+
+    const category = this.categoriesRepository.create({
+      name,
+      ...(parent && { parent }),
+    });
+
+    return this.categoriesRepository.save(category);
   }
 
   async findAll() {
     const parentCategories = await this.categoriesRepository.find({
-      where: { parent: null },
+      where: { parent: IsNull() },
       relations: ['children'],
     });
 
@@ -32,7 +51,16 @@ export class CategoriesService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} category`;
+    const category = await this.categoriesRepository.findOne({
+      where: { id },
+      relations: ['children'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    return category;
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
@@ -68,7 +96,16 @@ export class CategoriesService {
     return this.categoriesRepository.save(category);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number, userRole: string) {
+    // Проверка прав администратора
+    if (userRole !== 'admin') {
+      throw new ForbiddenException('Только администратор может удалять категории');
+    }
+
+    const category = await this.findOne(id);
+
+    await this.categoriesRepository.remove(category);
+    
+    return { message: `Категория "${category.name}" успешно удалена` };
   }
 }
