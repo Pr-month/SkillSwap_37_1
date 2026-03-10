@@ -11,4 +11,5 @@ export const ERROR_MESSAGES = {
   CANNOT_SEND_REQUEST_TO_SELF: 'Нельзя отправить заявку самому себе',
   REQUEST_NOT_FOUND: 'Заявка не найдена',
   REQUEST_DELETE_ONLY_OUTGOING: 'Удалить можно только исходящую заявку',
+  REQUEST_UPDATE_ONLY_INCOMING: 'Обновить можно только входящую заявку',
 } as const;

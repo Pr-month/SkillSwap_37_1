@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthRequest } from 'src/auth/types/auth.types';
+import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 
 @Controller('requests')
 export class RequestsController {
@@ -48,8 +48,9 @@ export class RequestsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-    return this.requestsService.update(+id, updateRequestDto);
+  @UseGuards(JwtAuthGuard)
+  updateStatus(@Param('id') id: string, @Body() dto: UpdateRequestStatusDto, req: AuthRequest) {
+    return this.requestsService.updateStatus(id, dto, req.user.sub);
   }
 
   @Delete(':id')
