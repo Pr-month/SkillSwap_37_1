@@ -55,6 +55,6 @@ async function seedCategories() {
 }
 
 seedCategories().catch((error) => {
-    console.error('Unhandled error during seeding:', error);
-    process.exit(1);
-  });
+  console.error('Unhandled error during seeding:', error);
+  process.exit(1);
+});

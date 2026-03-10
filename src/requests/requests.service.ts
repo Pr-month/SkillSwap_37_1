@@ -23,8 +23,7 @@ export class RequestsService {
     private readonly skillsRepository: Repository<Skill>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {
-  }
+  ) {}
 
   async create(senderId: string, dto: CreateRequestDto) {
     const sender = await this.usersRepository.findOne({
@@ -121,19 +120,17 @@ export class RequestsService {
   }
 
   async getIncoming(userId: string): Promise<Request[]> {
-    return this.requestsRepository.find(
-      {
-        where: { receiver: { id: userId } },
-        relations: {
-          sender: true,
-          offeredSkill: true,
-          requestedSkill: true,
-        },
+    return this.requestsRepository.find({
+      where: { receiver: { id: userId } },
+      relations: {
+        sender: true,
+        offeredSkill: true,
+        requestedSkill: true,
       },
-    );
+    });
   }
 
-  async getOutgoing(userId: string): Promise<Request[]>  {
+  async getOutgoing(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
       where: {
         sender: { id: userId },
@@ -146,10 +143,13 @@ export class RequestsService {
     });
   }
 
-  async updateStatus(userId: string, dto: UpdateRequestStatusDto, id: string): Promise<Request> {
-   const request = await this.requestsRepository.findOne({
-      where:
-         { id },
+  async updateStatus(
+    userId: string,
+    dto: UpdateRequestStatusDto,
+    id: string,
+  ): Promise<Request> {
+    const request = await this.requestsRepository.findOne({
+      where: { id },
       relations: {
         receiver: true,
       },
@@ -160,9 +160,7 @@ export class RequestsService {
     }
 
     if (request.receiver.id !== userId) {
-      throw new ForbiddenException(
-        ERROR_MESSAGES.REQUEST_UPDATE_ONLY_INCOMING,
-      );
+      throw new ForbiddenException(ERROR_MESSAGES.REQUEST_UPDATE_ONLY_INCOMING);
     }
 
     request.status = dto.status;

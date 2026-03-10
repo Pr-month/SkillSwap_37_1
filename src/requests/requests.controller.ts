@@ -49,7 +49,11 @@ export class RequestsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  updateStatus(@Param('id') id: string, @Body() dto: UpdateRequestStatusDto, req: AuthRequest) {
+  updateStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateRequestStatusDto,
+    req: AuthRequest,
+  ) {
     return this.requestsService.updateStatus(id, dto, req.user.sub);
   }
 
