@@ -49,6 +49,23 @@ export class SkillsController {
     };
   }
 
+  @Delete(':id/favorite')
+  @UseGuards(JwtAuthGuard)
+  async removeFromFavorite(
+    @Param('id') skillId: string,
+    @Request() req: AuthRequest,
+  ) {
+    const user = await this.usersService.removeFavoriteSkill(
+      req.user.sub,
+      skillId,
+    );
+
+    return {
+      message: 'Навык успешно удален из избранного',
+      favoriteSkills: user.favoriteSkills,
+    };
+  }
+
   @Get()
   findAll(
     @Query() paginationDto: PaginationDto,
