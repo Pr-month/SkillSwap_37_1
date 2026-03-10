@@ -131,6 +131,31 @@ export class UsersService {
     return user;
   }
 
+  async removeFavoriteSkill(userId: string, skillId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['favoriteSkills'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const exists = user.favoriteSkills.some((skill) => skill.id === skillId);
+
+    if (!exists) {
+      throw new NotFoundException('Навык не найден в избранном');
+    }
+
+    user.favoriteSkills = user.favoriteSkills.filter(
+      (skill) => skill.id !== skillId,
+    );
+
+    await this.usersRepository.save(user);
+
+    return user;
+  }
+
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
