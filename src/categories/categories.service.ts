@@ -4,6 +4,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 import { IsNull, Repository } from 'typeorm';
+import { ERROR_MESSAGES } from '../common/constants/error-messages';
 
 @Injectable()
 export class CategoriesService {
@@ -62,8 +63,37 @@ export class CategoriesService {
     return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: string, dto: UpdateCategoryDto) {
+    const category = await this.categoriesRepository.findOne({
+      where: { id },
+      relations: ['parent'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(ERROR_MESSAGES.CATEGORIES_NOT_FOUND);
+    }
+
+    if (dto.name) {
+      category.name = dto.name;
+    }
+
+    if (dto.parentId) {
+      const parent = await this.categoriesRepository.findOne({
+        where: { id: dto.parentId },
+      });
+
+      if (!parent) {
+        throw new NotFoundException(ERROR_MESSAGES.PARENT_CATEGORIES_NOT_FOUND);
+      }
+
+      category.parent = parent;
+    }
+
+    if (dto.parentId === null) {
+      category.parent = dto.parentId;
+    }
+
+    return this.categoriesRepository.save(category);
   }
 
   async remove(id: number, userRole: string) {

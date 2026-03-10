@@ -12,4 +12,6 @@ export const ERROR_MESSAGES = {
   REQUEST_NOT_FOUND: 'Заявка не найдена',
   REQUEST_DELETE_ONLY_OUTGOING: 'Удалить можно только исходящую заявку',
   REQUEST_UPDATE_ONLY_INCOMING: 'Обновить можно только входящую заявку',
+  CATEGORIES_NOT_FOUND: 'Категория не найдена',
+  PARENT_CATEGORIES_NOT_FOUND: 'Родительская категория не найдена'
 } as const;
