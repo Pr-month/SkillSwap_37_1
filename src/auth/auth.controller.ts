@@ -13,7 +13,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshAuthGuard } from './guards/refresh-auth.guard';
-import { AuthRequest } from './types/auth.types';
+import { AuthRequest, RefreshRequest } from './types/auth.types';
 
 @Controller('auth')
 export class AuthController {
@@ -39,7 +39,7 @@ export class AuthController {
 
   @Post('refresh')
   @UseGuards(RefreshAuthGuard)
-  async refresh(@Request() req: AuthRequest) {
-    return this.authService.refreshTokens(req.user.sub);
+  async refresh(@Request() req: RefreshRequest) {
+    return this.authService.refreshTokens(req.user.sub, req.token);
   }
 }
