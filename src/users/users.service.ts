@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -13,6 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig, AppConfig } from 'src/config/app.config';
+import { Skill } from 'src/skills/entities/skill.entity';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +35,11 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
+    }
+    return user;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -49,6 +55,9 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.update(id, updateUserDto);
+    if (!user) {
+      throw new NotFoundException(`Пользователь с ID ${id} не найден`);
+    }
     return this.findOne(id);
   }
 
@@ -100,6 +109,51 @@ export class UsersService {
       success: true,
       message: 'Пароль успешно изменен',
     };
+  }
+
+  async addFavoriteSkill(userId: string, skillId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['favoriteSkills'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    if (user.favoriteSkills.some((skill) => skill.id === skillId)) {
+      throw new ConflictException('Навык уже добавлен в избранное');
+    }
+
+    user.favoriteSkills.push({ id: skillId } as Skill);
+    await this.usersRepository.save(user);
+
+    return user;
+  }
+
+  async removeFavoriteSkill(userId: string, skillId: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['favoriteSkills'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден');
+    }
+
+    const exists = user.favoriteSkills.some((skill) => skill.id === skillId);
+
+    if (!exists) {
+      throw new NotFoundException('Навык не найден в избранном');
+    }
+
+    user.favoriteSkills = user.favoriteSkills.filter(
+      (skill) => skill.id !== skillId,
+    );
+
+    await this.usersRepository.save(user);
+
+    return user;
   }
 
   remove(id: number) {

@@ -90,7 +90,12 @@ export class AuthService {
       }),
     ]);
 
-    await this.usersService.updateRefreshToken(user.id, refreshToken);
+    const hashedRefreshToken = await bcrypt.hash(
+      refreshToken,
+      this.appConfig.hashSalt,
+    );
+
+    await this.usersService.updateRefreshToken(user.id, hashedRefreshToken);
 
     return {
       accessToken,
@@ -98,11 +103,28 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(userId: string) {
+  async logout(userId: string): Promise<void> {
+    await this.usersService.updateRefreshToken(userId, null);
+  }
+
+  async refreshTokens(userId: string, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
 
     if (!user) {
       throw new UnauthorizedException('Пользователь не найден');
+    }
+
+    if (!user.refreshToken) {
+      throw new UnauthorizedException('Доступ запрещен');
+    }
+
+    const isRefreshTokenValid = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
+
+    if (!isRefreshTokenValid) {
+      throw new UnauthorizedException('Доступ запрещен');
     }
 
     const tokens = await this.generateTokens(user);

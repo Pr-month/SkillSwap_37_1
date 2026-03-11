@@ -1,7 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
@@ -10,7 +9,6 @@ import {
   Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRequest } from '../auth/types/auth.types';
@@ -21,11 +19,6 @@ import { ChangePasswordDto } from './dto/user-change-password.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
   @Get()
   findAll(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
@@ -34,12 +27,7 @@ export class UsersController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   async getMe(@Request() req: AuthRequest) {
-    const user = await this.usersService.findOne(req.user.sub);
-    if (!user) {
-      return null;
-    }
-    const { password, refreshToken, ...result } = user;
-    return result;
+    return this.usersService.findOne(req.user.sub);
   }
 
   @Patch('me')
@@ -48,15 +36,7 @@ export class UsersController {
     @Request() req: AuthRequest,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const updatedUser = await this.usersService.update(
-      req.user.sub,
-      updateUserDto,
-    );
-    if (!updatedUser) {
-      return null;
-    }
-    const { password, refreshToken, ...result } = updatedUser;
-    return result;
+    return this.usersService.update(req.user.sub, updateUserDto);
   }
 
   @Patch('me/password')
