@@ -12,7 +12,7 @@ export class Skill {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   title: string;
 
   @Column({ type: 'text', nullable: true })
