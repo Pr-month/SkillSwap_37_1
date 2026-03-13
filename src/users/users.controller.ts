@@ -6,26 +6,22 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request, Query,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRequest } from '../auth/types/auth.types';
+import { UserResponseDto } from './dto/user-response.dto';
 import { ChangePasswordDto } from './dto/user-change-password.dto';
-import { PaginatedUsersResultDto } from './dto/paginated-users-result.dto';
-import { PaginationUsersDto } from './dto/pagination-users.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(@Query() paginationDto: PaginationUsersDto): Promise<PaginatedUsersResultDto> {
-    return this.usersService.findAll({
-      ...paginationDto,
-      limit: paginationDto.limit > 10 ? 10 : paginationDto.limit,
-    });
+  findAll(): Promise<UserResponseDto[]> {
+    return this.usersService.findAll();
   }
 
   @Get('me')
