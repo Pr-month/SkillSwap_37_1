@@ -40,6 +40,6 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(RefreshAuthGuard)
   async refresh(@Request() req: RefreshRequest) {
-    return this.authService.refreshTokens(req.user.sub, req.token);
+    return this.authService.refreshTokens(req.user.sub, req.user.refreshToken);
   }
 }

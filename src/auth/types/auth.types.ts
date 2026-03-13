@@ -16,6 +16,8 @@ export type AuthRequest = Request & {
 };
 
 export type RefreshRequest = Request & {
-  user: RefreshPayload;
-  token: string;
+  user: {
+    sub: string;
+    refreshToken: string;
+  };
 };
