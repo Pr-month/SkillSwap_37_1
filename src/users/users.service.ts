@@ -8,13 +8,14 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig, AppConfig } from 'src/config/app.config';
 import { Skill } from 'src/skills/entities/skill.entity';
+import { PaginatedUsersResultDto } from './dto/paginated-users-result.dto';
+import { PaginationUsersDto } from './dto/pagination-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,15 +24,41 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @Inject(appConfig.KEY)
     private readonly appConfig: AppConfig,
-  ) {}
+  ) {
+  }
 
   create(createUserDto: CreateUserDto) {
     const user = this.usersRepository.create(createUserDto);
     return this.usersRepository.save(user);
   }
 
-  findAll(): Promise<UserResponseDto[]> {
-    return this.usersRepository.find();
+  async findAll(paginationDto: PaginationUsersDto): Promise<PaginatedUsersResultDto> {
+    const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
+    const { page, limit } = paginationDto;
+
+    const query = this.usersRepository.createQueryBuilder('user');
+
+    query.orderBy('user.name');
+
+    const [users, totalCount] = await query
+      .skip(skippedItems)
+      .take(paginationDto.limit)
+      .getManyAndCount();
+
+    const lastPage = Math.ceil(totalCount / limit);
+
+    if (page > lastPage) {
+      throw new NotFoundException(
+        `Страница ${page} не найдена. Всего страниц: ${lastPage}`,
+      );
+    }
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      data: users,
+    };
   }
 
   async findOne(id: string): Promise<User | null> {
