@@ -18,14 +18,14 @@ import { PaginationUsersDto } from './dto/pagination-users.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) {
+  }
 
   @Get()
   findAll(@Query() paginationDto: PaginationUsersDto): Promise<PaginatedUsersResultDto> {
-    return this.usersService.findAll({
-      ...paginationDto,
-      limit: paginationDto.limit > 10 ? 10 : paginationDto.limit,
-    });
+    return this.usersService.findAll(
+      paginationDto,
+    );
   }
 
   @Get('me')
