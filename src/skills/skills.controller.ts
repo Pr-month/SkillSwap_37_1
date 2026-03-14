@@ -28,8 +28,9 @@ export class SkillsController {
   ) {}
 
   @Post()
-  create(@Body() createSkillDto: CreateSkillDto) {
-    return this.skillsService.create(createSkillDto);
+  @UseGuards(JwtAuthGuard)
+  create(@Body() createSkillDto: CreateSkillDto, @Request() req: AuthRequest) {
+    return this.skillsService.create(createSkillDto, req.user.sub);
   }
 
   @Post(':id/favorite')

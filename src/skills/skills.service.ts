@@ -18,9 +18,9 @@ export class SkillsService {
     private readonly skillsRepository: Repository<Skill>,
   ) {}
 
-  create(createSkillDto: CreateSkillDto): Promise<Skill> {
+  create(createSkillDto: CreateSkillDto, userId: string): Promise<Skill> {
     const skill = this.skillsRepository.create(
-      createSkillDto as Partial<Skill>,
+      { ...createSkillDto, owner: { id: userId } },
     );
     return this.skillsRepository.save(skill);
   }
