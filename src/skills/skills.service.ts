@@ -10,18 +10,28 @@ import {
 } from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
+import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
-  create(createSkillDto: CreateSkillDto, userId: string): Promise<Skill> {
-    const skill = this.skillsRepository.create(
-      { ...createSkillDto, owner: { id: userId } },
-    );
+  async create(createSkillDto: CreateSkillDto, userId: string): Promise<Skill> {
+    const { categoryId, ...rest } = createSkillDto;
+    const category = categoryId
+      ? await this.categoriesService.findOne(categoryId)
+      : null;
+
+    const skill = this.skillsRepository.create({
+      ...rest,
+      owner: { id: userId },
+      category,
+    });
+
     return this.skillsRepository.save(skill);
   }
 
@@ -34,9 +44,7 @@ export class SkillsService {
     const query = this.skillsRepository.createQueryBuilder('skill');
 
     if (search) {
-      query.where('skill.title ILIKE :search', {
-        search: `%${search}%`,
-      });
+      query.where('skill.title ILIKE :search', { search: `%${search}%` });
     }
 
     query.orderBy('skill.title', 'DESC');
@@ -84,7 +92,16 @@ export class SkillsService {
       throw new ForbiddenException('Можно обновлять только свои навыки');
     }
 
-    Object.assign(skill, updateSkillDto);
+    const { categoryId, ...rest } = updateSkillDto;
+
+    Object.assign(skill, rest);
+
+    if (categoryId !== undefined) {
+      skill.category = categoryId
+        ? await this.categoriesService.findOne(categoryId)
+        : null;
+    }
+
     return this.skillsRepository.save(skill);
   }
 

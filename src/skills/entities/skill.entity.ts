@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity('skills')
 export class Skill {
@@ -23,6 +24,9 @@ export class Skill {
 
   @Column('text', { array: true, default: [] })
   images: string[];
+
+  @ManyToOne(() => Category, { nullable: true, eager: true })
+  category: Category | null;
 
   @ManyToOne(() => User, (user) => user.skills)
   owner: User;
