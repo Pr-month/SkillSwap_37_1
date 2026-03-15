@@ -31,7 +31,9 @@ export class SkillsService {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
-    const query = this.skillsRepository.createQueryBuilder('skill');
+    const query = this.skillsRepository
+      .createQueryBuilder('skill')
+      .leftJoinAndSelect('skill.owner', 'owner');
 
     if (search) {
       query.where('skill.title ILIKE :search', {
