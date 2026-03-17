@@ -3,7 +3,7 @@ import { AppDataSource } from '../config/ormconfig';
 import { User } from '../users/entities/user.entity';
 import { Skill } from '../skills/entities/skill.entity';
 import { skillNames } from './skills.data';
-import { UserRole } from '../users/entities/user.enums';
+import { UserRole } from '../users/enums/user.enums';
 
 dotenv.config();
 

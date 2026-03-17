@@ -1,6 +1,11 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UserRole } from '../../users/entities/user.enums';
+import { UserRole } from '../../users/enums/user.enums';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
@@ -8,10 +13,10 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     // Если роли не указаны, доступ разрешён
     if (!requiredRoles) {
@@ -22,7 +27,9 @@ export class RolesGuard implements CanActivate {
 
     // Если пользователь не аутентифицирован (нет user) — доступ запрещён
     if (!user) {
-      throw new ForbiddenException('Доступ запрещён: пользователь не аутентифицирован');
+      throw new ForbiddenException(
+        'Доступ запрещён: пользователь не аутентифицирован',
+      );
     }
 
     // Проверяем наличие хотя бы одной требуемой роли

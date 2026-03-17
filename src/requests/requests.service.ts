@@ -11,7 +11,7 @@ import { Request } from './entities/request.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
-import { UserRole } from 'src/users/entities/user.enums';
+import { UserRole } from 'src/users/enums/user.enums';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 
 @Injectable()

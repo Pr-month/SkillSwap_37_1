@@ -1,4 +1,4 @@
-import { Gender, UserRole } from '../entities/user.enums';
+import { Gender, UserRole } from '../enums/user.enums';
 
 export class UserResponseDto {
   id: string;

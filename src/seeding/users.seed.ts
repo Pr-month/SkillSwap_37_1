@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import { AppDataSource } from '../config/ormconfig';
 import { User } from '../users/entities/user.entity';
-import { UserRole } from '../users/entities/user.enums';
+import { UserRole } from '../users/enums/user.enums';
 import * as bcrypt from 'bcrypt';
 import { testUsers } from './users.data';
 
