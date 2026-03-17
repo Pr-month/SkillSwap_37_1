@@ -7,6 +7,9 @@ import {
   ApiTags,
   ApiParam,
 } from '@nestjs/swagger';
+import { CreateCategoryDto } from '../dto/create-category.dto';
+import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { CategoryResponseDto } from '../dto/category-response.dto';
 
 // Для создания категории
 export function ApiCreateCategory() {
@@ -14,35 +17,11 @@ export function ApiCreateCategory() {
     ApiTags('Categories'),
     ApiBearerAuth('JWT-auth'),
     ApiOperation({ summary: 'Создать новую категорию' }),
-    ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            example: 'IT и программирование',
-            description: 'Название категории',
-          },
-          parentId: {
-            type: 'string',
-            example: '123e4567-e89b-12d3-a456-426614174000',
-            description: 'ID родительской категории (если это подкатегория)',
-            nullable: true,
-          },
-        },
-        required: ['name'],
-      },
-    }),
+    ApiBody({ type: CreateCategoryDto }),
     ApiResponse({
       status: 201,
       description: 'Категория успешно создана',
-      schema: {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'IT и программирование',
-          parent: null,
-        },
-      },
+      type: CategoryResponseDto,
     }),
     ApiResponse({ status: 400, description: 'Ошибка валидации' }),
     ApiResponse({ status: 401, description: 'Не авторизован' }),
@@ -61,26 +40,7 @@ export function ApiGetAllCategories() {
     ApiResponse({
       status: 200,
       description: 'Список категорий с дочерними элементами',
-      schema: {
-        example: [
-          {
-            name: 'IT и программирование',
-            children: [
-              { name: 'Frontend' },
-              { name: 'Backend' },
-              { name: 'DevOps' },
-            ],
-          },
-          {
-            name: 'Дизайн и UX/UI',
-            children: [
-              { name: 'Графический дизайн' },
-              { name: 'UX/UI' },
-              { name: 'Web-дизайн' },
-            ],
-          },
-        ],
-      },
+      type: [CategoryResponseDto],
     }),
   );
 }
@@ -98,14 +58,7 @@ export function ApiGetCategoryById() {
     ApiResponse({
       status: 200,
       description: 'Категория найдена',
-      schema: {
-        example: {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'IT и программирование',
-          parent: null,
-          children: [{ id: 'uuid-2', name: 'Frontend' }],
-        },
-      },
+      type: CategoryResponseDto,
     }),
     ApiResponse({ status: 404, description: 'Категория не найдена' }),
   );
@@ -122,25 +75,12 @@ export function ApiUpdateCategory() {
       description: 'UUID категории',
       example: '123e4567-e89b-12d3-a456-426614174000',
     }),
-    ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          name: {
-            type: 'string',
-            example: 'IT и программирование (обновлено)',
-            description: 'Новое название категории',
-          },
-          parentId: {
-            type: 'string',
-            example: 'uuid-родителя',
-            description: 'Новый родитель',
-            nullable: true,
-          },
-        },
-      },
+    ApiBody({ type: UpdateCategoryDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Категория обновлена',
+      type: CategoryResponseDto,
     }),
-    ApiResponse({ status: 200, description: 'Категория обновлена' }),
     ApiResponse({ status: 401, description: 'Не авторизован' }),
     ApiResponse({ status: 404, description: 'Категория не найдена' }),
   );
