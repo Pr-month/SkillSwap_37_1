@@ -8,7 +8,7 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Gender, UserRole } from './user.enums';
+import { Gender, UserRole } from '../enums/user.enums';
 
 @Entity('users')
 export class User {

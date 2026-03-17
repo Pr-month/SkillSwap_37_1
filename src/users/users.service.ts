@@ -24,15 +24,16 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @Inject(appConfig.KEY)
     private readonly appConfig: AppConfig,
-  ) {
-  }
+  ) {}
 
   create(createUserDto: CreateUserDto) {
     const user = this.usersRepository.create(createUserDto);
     return this.usersRepository.save(user);
   }
 
-  async findAll(paginationDto: PaginationUsersDto): Promise<PaginatedUsersResultDto> {
+  async findAll(
+    paginationDto: PaginationUsersDto,
+  ): Promise<PaginatedUsersResultDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit } = paginationDto;
 
