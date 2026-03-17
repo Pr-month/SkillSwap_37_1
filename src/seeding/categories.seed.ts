@@ -24,34 +24,22 @@ async function findOrCreateCategory(
   return category;
 }
 
-async function seedCategories() {
-  try {
-    await AppDataSource.initialize();
+export async function seedCategories() {
+  const categoryRepo = AppDataSource.getRepository(Category);
 
-    const categoryRepo = AppDataSource.getRepository(Category);
+  console.log('Starting categories seeding...');
 
-    console.log('Starting categories seeding...');
+  for (const group of CategoriesData) {
+    // Создаём/находим родительскую категорию
+    const parentCategory = await findOrCreateCategory(categoryRepo, group.name);
 
-    for (const group of CategoriesData) {
-      // Создаём/находим родительскую категорию
-      const parentCategory = await findOrCreateCategory(
-        categoryRepo,
-        group.name,
-      );
-
-      // Создаём дочерние категории
-      for (const childName of group.children) {
-        await findOrCreateCategory(categoryRepo, childName, parentCategory);
-      }
+    // Создаём дочерние категории
+    for (const childName of group.children) {
+      await findOrCreateCategory(categoryRepo, childName, parentCategory);
     }
-
-    console.log('Categories seeding completed successfully');
-  } catch (error) {
-    console.error('Error during categories seeding:', error);
-  } finally {
-    await AppDataSource.destroy();
-    process.exit(0);
   }
+
+  console.log('Categories seeding completed successfully');
 }
 
 seedCategories().catch((error) => {
