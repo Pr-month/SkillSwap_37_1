@@ -1,10 +1,6 @@
-import * as dotenv from 'dotenv';
-import { Repository } from 'typeorm';
-import { AppDataSource } from '../config/ormconfig';
+import { Repository, DataSource } from 'typeorm';
 import { Category } from '../categories/entities/category.entity';
 import { CategoriesData } from './categories.data';
-
-dotenv.config();
 
 async function findOrCreateCategory(
   repo: Repository<Category>,
@@ -24,8 +20,8 @@ async function findOrCreateCategory(
   return category;
 }
 
-export async function seedCategories() {
-  const categoryRepo = AppDataSource.getRepository(Category);
+export async function seedCategories(dataSource: DataSource) {
+  const categoryRepo = dataSource.getRepository(Category);
 
   console.log('Starting categories seeding...');
 
@@ -41,8 +37,3 @@ export async function seedCategories() {
 
   console.log('Categories seeding completed successfully');
 }
-
-seedCategories().catch((error) => {
-  console.error('Unhandled error during seeding:', error);
-  process.exit(1);
-});

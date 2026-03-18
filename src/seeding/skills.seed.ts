@@ -1,15 +1,12 @@
-import * as dotenv from 'dotenv';
-import { AppDataSource } from '../config/ormconfig';
+import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Skill } from '../skills/entities/skill.entity';
 import { skillNames } from './skills.data';
 import { UserRole } from '../users/entities/user.enums';
 
-dotenv.config();
-
-export async function seedSkills() {
-  const userRepository = AppDataSource.getRepository(User);
-  const skillRepository = AppDataSource.getRepository(Skill);
+export async function seedSkills(dataSource: DataSource) {
+  const userRepository = dataSource.getRepository(User);
+  const skillRepository = dataSource.getRepository(Skill);
 
   const users = await userRepository.find({
     where: { role: UserRole.USER },
@@ -54,8 +51,3 @@ export async function seedSkills() {
     `Skills seeding completed. Created: ${createdCount}, Skipped (already exist): ${skippedCount}`,
   );
 }
-
-seedSkills().catch((error) => {
-  console.error('Unhandled error:', error);
-  process.exit(1);
-});

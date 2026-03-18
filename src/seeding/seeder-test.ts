@@ -1,11 +1,8 @@
-import * as dotenv from 'dotenv';
 import { AppDataSource } from '../config/ormconfig';
 import { seedCategories } from './categories.seed';
 import { seedUsers } from './users.seed';
 import { seedSkills } from './skills.seed';
 import { seedAdmin } from './admin.seed';
-
-dotenv.config();
 
 async function seederTest() {
   try {
@@ -16,17 +13,15 @@ async function seederTest() {
     console.log('База данных подключена');
 
     // Очищаем БД
-    await AppDataSource.query('TRUNCATE TABLE "skill" CASCADE;');
-    await AppDataSource.query('TRUNCATE TABLE "user" CASCADE;');
-    await AppDataSource.query('TRUNCATE TABLE "category" CASCADE;');
+    await AppDataSource.synchronize(true);
     console.log('База данных очищена');
 
     // Запускаем сиды
     console.log('Заполнение тестовыми данными:');
-    await seedCategories();
-    await seedUsers();
-    await seedAdmin();
-    await seedSkills();
+    await seedCategories(AppDataSource);
+    await seedUsers(AppDataSource);
+    await seedAdmin(AppDataSource);
+    await seedSkills(AppDataSource);
 
     console.log('Тестовые данные загружены');
   } catch (error) {

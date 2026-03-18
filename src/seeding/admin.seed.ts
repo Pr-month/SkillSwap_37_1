@@ -1,13 +1,10 @@
-import * as dotenv from 'dotenv';
-import { AppDataSource } from '../config/ormconfig';
+import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/entities/user.enums';
 import * as bcrypt from 'bcrypt';
 
-dotenv.config();
-
-export async function seedAdmin() {
-  const userRepository = AppDataSource.getRepository(User);
+export async function seedAdmin(dataSource: DataSource) {
+  const userRepository = dataSource.getRepository(User);
 
   // Получаем данные из .env (или используем значения по умолчанию)
   const adminName = process.env.ADMIN_NAME || 'Admin';
@@ -39,8 +36,3 @@ export async function seedAdmin() {
   await userRepository.save(admin);
   console.log(`Admin user created with email: ${adminEmail}`);
 }
-
-seedAdmin().catch((error) => {
-  console.error('Unhandled error during seeding:', error);
-  process.exit(1);
-});

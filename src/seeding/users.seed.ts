@@ -1,14 +1,11 @@
-import * as dotenv from 'dotenv';
-import { AppDataSource } from '../config/ormconfig';
+import { DataSource } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { UserRole } from '../users/entities/user.enums';
 import * as bcrypt from 'bcrypt';
 import { testUsers } from './users.data';
 
-dotenv.config();
-
-export async function seedUsers() {
-  const userRepository = AppDataSource.getRepository(User);
+export async function seedUsers(dataSource: DataSource) {
+  const userRepository = dataSource.getRepository(User);
 
   const saltRounds = parseInt(process.env.HASH_SALT || '10', 10);
 
@@ -42,8 +39,3 @@ export async function seedUsers() {
 
   console.log('Users seeding completed successfully');
 }
-
-seedUsers().catch((error) => {
-  console.error('Unhandled error:', error);
-  process.exit(1);
-});
