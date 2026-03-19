@@ -32,7 +32,19 @@ export class SkillsService {
       category,
     });
 
-    return this.skillsRepository.save(skill);
+    const savedSkill = await this.skillsRepository.save(skill);
+
+    const skillWithOwner = await this.skillsRepository.findOne({
+      where: { id: savedSkill.id },
+      relations: ['owner'],
+    });
+
+    if (!skillWithOwner) {
+      throw new NotFoundException('Навык не найден после создания');
+    }
+
+
+    return skillWithOwner;
   }
 
   async findAll(
