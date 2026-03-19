@@ -14,7 +14,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig, AppConfig } from 'src/config/app.config';
 import { Skill } from 'src/skills/entities/skill.entity';
-import { PaginatedUsersResultDto } from './dto/paginated-users-result.dto';
+import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { PaginationUsersDto } from './dto/pagination-users.dto';
 
 @Injectable()
@@ -33,7 +33,7 @@ export class UsersService {
 
   async findAll(
     paginationDto: PaginationUsersDto,
-  ): Promise<PaginatedUsersResultDto> {
+  ): Promise<PaginatedUsersResponseDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit } = paginationDto;
 
