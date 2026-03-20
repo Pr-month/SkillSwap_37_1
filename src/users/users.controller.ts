@@ -14,28 +14,38 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRequest } from '../auth/types/auth.types';
 import { ChangePasswordDto } from './dto/user-change-password.dto';
-import { PaginatedUsersResultDto } from './dto/paginated-users-result.dto';
+import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { PaginationUsersDto } from './dto/pagination-users.dto';
+import {
+  ApiGetAllUsers,
+  ApiGetMe,
+  ApiUpdateMe,
+  ApiChangePassword,
+  ApiGetUserById,
+} from './swagger/users.swagger';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @ApiGetAllUsers()
   findAll(
     @Query() paginationDto: PaginationUsersDto,
-  ): Promise<PaginatedUsersResultDto> {
+  ): Promise<PaginatedUsersResponseDto> {
     return this.usersService.findAll(paginationDto);
   }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiGetMe()
   async getMe(@Request() req: AuthRequest) {
     return this.usersService.findOne(req.user.sub);
   }
 
   @Patch('me')
   @UseGuards(JwtAuthGuard)
+  @ApiUpdateMe()
   async updateMe(
     @Request() req: AuthRequest,
     @Body() updateUserDto: UpdateUserDto,
@@ -45,6 +55,7 @@ export class UsersController {
 
   @Patch('me/password')
   @UseGuards(JwtAuthGuard)
+  @ApiChangePassword()
   async changeMyPassword(
     @Request() req: AuthRequest,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -57,6 +68,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiGetUserById()
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
