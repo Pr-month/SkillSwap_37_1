@@ -1,10 +1,6 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { WsException } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { JwtPayload } from 'src/auth/types/auth.types';
 import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
@@ -29,7 +25,7 @@ export class WsJwtGuard implements CanActivate {
 
       return payload;
     } catch {
-      throw new UnauthorizedException(ERROR_MESSAGES.WS_UNAUTHORIZED);
+      throw new WsException(ERROR_MESSAGES.WS_UNAUTHORIZED);
     }
   }
 
@@ -37,7 +33,7 @@ export class WsJwtGuard implements CanActivate {
     const token = client.handshake.query?.token;
 
     if (!token || Array.isArray(token)) {
-      throw new UnauthorizedException(ERROR_MESSAGES.WS_TOKEN_MISSING);
+      throw new WsException(ERROR_MESSAGES.WS_TOKEN_MISSING);
     }
 
     return token;
