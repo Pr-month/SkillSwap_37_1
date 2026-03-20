@@ -13,6 +13,9 @@ import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { UserRole } from 'src/users/enums/user.enums';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
+import { RequestStatus } from './entities/request.enums';
+import { NotificationsGateway } from 'src/notification/notifications.gateway';
+import { NOTIFICATION_MESSAGES } from 'src/notification/constants/notification-messages';
 
 @Injectable()
 export class RequestsService {
@@ -23,6 +26,7 @@ export class RequestsService {
     private readonly skillsRepository: Repository<Skill>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(senderId: string, dto: CreateRequestDto) {
@@ -76,7 +80,7 @@ export class RequestsService {
 
     const saved = await this.requestsRepository.save(request);
 
-    return this.requestsRepository.findOne({
+    const savedRequest = await this.requestsRepository.findOne({
       where: { id: saved.id },
       relations: {
         sender: true,
@@ -85,6 +89,18 @@ export class RequestsService {
         requestedSkill: true,
       },
     });
+
+    if (!savedRequest) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUEST_NOT_FOUND);
+    }
+
+    this.notificationsGateway.notifyNewRequest(savedRequest.receiver.id, {
+      message: NOTIFICATION_MESSAGES.NEW_REQUEST(savedRequest.sender.name),
+      skillTitle: savedRequest.requestedSkill.title,
+      fromUser: savedRequest.sender.name,
+    });
+
+    return savedRequest;
   }
 
   findAll() {
@@ -94,10 +110,6 @@ export class RequestsService {
   findOne(id: number) {
     return `This action returns a #${id} request`;
   }
-
-  // update(id: number, updateRequestDto: UpdateRequestDto) {
-  //   return `This action updates a #${id} request`;
-  // } как я понимаю, не потребуется больше
 
   async remove(id: string, actorId: string, actorRole: UserRole) {
     const request = await this.requestsRepository.findOne({
@@ -144,14 +156,16 @@ export class RequestsService {
   }
 
   async updateStatus(
+    id: string,
     userId: string,
     dto: UpdateRequestStatusDto,
-    id: string,
   ): Promise<Request> {
     const request = await this.requestsRepository.findOne({
       where: { id },
       relations: {
         receiver: true,
+        sender: true,
+        requestedSkill: true,
       },
     });
 
@@ -165,6 +179,24 @@ export class RequestsService {
 
     request.status = dto.status;
 
-    return this.requestsRepository.save(request);
+    await this.requestsRepository.save(request);
+
+    if (request.status === RequestStatus.ACCEPTED) {
+      this.notificationsGateway.notifyRequestAccepted(request.sender.id, {
+        message: NOTIFICATION_MESSAGES.REQUEST_ACCEPTED(request.receiver.name),
+        skillTitle: request.requestedSkill.title,
+        fromUser: request.receiver.name,
+      });
+    }
+
+    if (request.status === RequestStatus.REJECTED) {
+      this.notificationsGateway.notifyRequestRejected(request.sender.id, {
+        message: NOTIFICATION_MESSAGES.REQUEST_REJECTED(request.receiver.name),
+        skillTitle: request.requestedSkill.title,
+        fromUser: request.receiver.name,
+      });
+    }
+
+    return request;
   }
 }

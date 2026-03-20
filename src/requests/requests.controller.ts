@@ -51,10 +51,10 @@ export class RequestsController {
   @UseGuards(JwtAuthGuard)
   updateStatus(
     @Param('id') id: string,
+    @Request() req: AuthRequest,
     @Body() dto: UpdateRequestStatusDto,
-    req: AuthRequest,
   ) {
-    return this.requestsService.updateStatus(id, dto, req.user.sub);
+    return this.requestsService.updateStatus(id, req.user.sub, dto);
   }
 
   @Delete(':id')
