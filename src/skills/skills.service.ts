@@ -43,7 +43,6 @@ export class SkillsService {
       throw new NotFoundException('Навык не найден после создания');
     }
 
-
     return skillWithOwner;
   }
 
