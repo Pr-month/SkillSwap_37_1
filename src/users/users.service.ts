@@ -16,12 +16,15 @@ import { appConfig, AppConfig } from 'src/config/app.config';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { PaginationUsersDto } from './dto/pagination-users.dto';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Skill)
+    private readonly skillsRepository: Repository<Skill>,
     @Inject(appConfig.KEY)
     private readonly appConfig: AppConfig,
   ) {}
@@ -182,6 +185,31 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     return user;
+  }
+
+  async findUsersBySkill(skillId: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id: skillId },
+    });
+
+    if (!skill) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUESTED_SKILL_NOT_FOUND);
+    }
+
+    if (!skill.category) {
+      throw new NotFoundException(ERROR_MESSAGES.CATEGORIES_NOT_FOUND);
+    }
+
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.skills', 'skill')
+      .leftJoin('skill.category', 'category')
+      .where('category.id = :categoryId', {
+        categoryId: skill.category.id,
+      })
+      .distinct(true)
+      .take(10)
+      .getMany();
   }
 
   remove(id: number) {
