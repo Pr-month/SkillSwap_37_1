@@ -13,7 +13,7 @@ import { User } from 'src/users/entities/user.entity';
 import { ERROR_MESSAGES } from '../common/constants/error-messages';
 import { UserRole } from 'src/users/enums/user.enums';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
-import { RequestStatus } from './entities/request.enums';
+import { RequestStatus } from './enums/request.enums';
 import { NotificationsGateway } from 'src/notification/notifications.gateway';
 import { NOTIFICATION_MESSAGES } from 'src/notification/constants/notification-messages';
 

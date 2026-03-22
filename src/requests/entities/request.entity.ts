@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
-import { RequestStatus } from './request.enums';
+import { RequestStatus } from '../enums/request.enums';
 
 @Entity('requests')
 export class Request {
