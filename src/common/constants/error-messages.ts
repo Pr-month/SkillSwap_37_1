@@ -14,4 +14,6 @@ export const ERROR_MESSAGES = {
   REQUEST_UPDATE_ONLY_INCOMING: 'Обновить можно только входящую заявку',
   CATEGORIES_NOT_FOUND: 'Категория не найдена',
   PARENT_CATEGORIES_NOT_FOUND: 'Родительская категория не найдена',
+  WS_TOKEN_MISSING: 'Токен для websocket не передан',
+  WS_UNAUTHORIZED: 'Неавторизованное websocket-подключение',
 } as const;
