@@ -467,7 +467,7 @@ describe('UsersService', () => {
   describe('remove', () => {
     it('should return removal message', () => {
       const result = service.remove(1);
-      expect(result).toBe('This action removes a user');
+      expect(result).toBe('This action removes a #1 user');
     });
   });
 });
