@@ -73,6 +73,11 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
+  @Get('by-skill/:id')
+  findBySkill(@Param('id') skillId: string) {
+    return this.usersService.findUsersBySkill(skillId);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

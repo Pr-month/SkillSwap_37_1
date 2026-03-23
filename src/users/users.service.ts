@@ -10,24 +10,44 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig, AppConfig } from 'src/config/app.config';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { PaginatedUsersResponseDto } from './dto/paginated-users-response.dto';
 import { PaginationUsersDto } from './dto/pagination-users.dto';
+import { ERROR_MESSAGES } from 'src/common/constants/error-messages';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Skill)
+    private readonly skillsRepository: Repository<Skill>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
     @Inject(appConfig.KEY)
     private readonly appConfig: AppConfig,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    const { wantToLearn, ...rest } = createUserDto;
+
+    let categories: Category[] = [];
+
+    if (wantToLearn?.length) {
+      categories = await this.categoriesRepository.findBy({
+        id: In(wantToLearn),
+      });
+    }
+
+    const user = this.usersRepository.create({
+      ...rest,
+      wantToLearn: categories,
+    });
+
     return this.usersRepository.save(user);
   }
 
@@ -82,11 +102,24 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.update(id, updateUserDto);
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['wantToLearn'],
+    });
+
     if (!user) {
       throw new NotFoundException(`Пользователь с ID ${id} не найден`);
     }
-    return this.findOne(id);
+
+    if (updateUserDto.wantToLearn) {
+      user.wantToLearn = await this.categoriesRepository.findBy({
+        id: In(updateUserDto.wantToLearn),
+      });
+    }
+
+    Object.assign(user, updateUserDto);
+
+    return this.usersRepository.save(user);
   }
 
   async changePassword(
@@ -182,6 +215,31 @@ export class UsersService {
     await this.usersRepository.save(user);
 
     return user;
+  }
+
+  async findUsersBySkill(skillId: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id: skillId },
+    });
+
+    if (!skill) {
+      throw new NotFoundException(ERROR_MESSAGES.REQUESTED_SKILL_NOT_FOUND);
+    }
+
+    if (!skill.category) {
+      throw new NotFoundException(ERROR_MESSAGES.CATEGORIES_NOT_FOUND);
+    }
+
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.skills', 'skill')
+      .leftJoin('skill.category', 'category')
+      .where('category.id = :categoryId', {
+        categoryId: skill.category.id,
+      })
+      .distinct(true)
+      .take(10)
+      .getMany();
   }
 
   remove(id: number) {

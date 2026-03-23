@@ -5,7 +5,7 @@ import {
   MinLength,
   IsEnum,
   IsDateString,
-  IsOptional,
+  IsOptional, IsArray, IsUUID,
 } from 'class-validator';
 import { Gender } from '../enums/user.enums';
 
@@ -66,4 +66,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   avatar?: string;
+
+  @IsArray()
+  @IsUUID()
+  @IsOptional()
+  wantToLearn?: string[];
 }
