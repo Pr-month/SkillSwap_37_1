@@ -8,7 +8,8 @@ import {
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-import { Gender, UserRole } from './user.enums';
+import { Gender, UserRole } from '../enums/user.enums';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity('users')
 export class User {
@@ -47,8 +48,11 @@ export class User {
   @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Skill[];
 
-  // @Column('simple-array', { nullable: true })
-  // wantToLearn: string[];
+  @ManyToMany(() => Category)
+  @JoinTable({
+    name: 'user_categories',
+  })
+  wantToLearn: Category[];
 
   @ManyToMany(() => Skill, (skill) => skill.favoritedBy)
   @JoinTable({

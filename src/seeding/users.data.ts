@@ -1,4 +1,4 @@
-import { Gender } from '../users/entities/user.enums';
+import { Gender } from '../users/enums/user.enums';
 
 // Данные тестовых пользователей
 export const testUsers = [

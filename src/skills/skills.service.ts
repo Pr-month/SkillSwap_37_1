@@ -9,34 +9,56 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
-import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
+import { PaginatedSkillsResponseDto } from './dto/paginated-skills-response.dto';
+import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
-  create(createSkillDto: CreateSkillDto): Promise<Skill> {
-    const skill = this.skillsRepository.create(
-      createSkillDto as Partial<Skill>,
-    );
-    return this.skillsRepository.save(skill);
+  async create(createSkillDto: CreateSkillDto, userId: string): Promise<Skill> {
+    const { categoryId, ...rest } = createSkillDto;
+    const category = categoryId
+      ? await this.categoriesService.findOne(categoryId)
+      : null;
+
+    const skill = this.skillsRepository.create({
+      ...rest,
+      owner: { id: userId },
+      category,
+    });
+
+    const savedSkill = await this.skillsRepository.save(skill);
+
+    const skillWithOwner = await this.skillsRepository.findOne({
+      where: { id: savedSkill.id },
+      relations: ['owner'],
+    });
+
+    if (!skillWithOwner) {
+      throw new NotFoundException('Навык не найден после создания');
+    }
+
+    return skillWithOwner;
   }
 
   async findAll(
     paginationDto: PaginationDto,
-  ): Promise<PaginatedSkillsResultDto> {
+  ): Promise<PaginatedSkillsResponseDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
-    const query = this.skillsRepository.createQueryBuilder('skill');
+    const query = this.skillsRepository
+      .createQueryBuilder('skill')
+      .leftJoinAndSelect('skill.owner', 'owner')
+      .leftJoinAndSelect('skill.category', 'category');
 
     if (search) {
-      query.where('skill.title ILIKE :search', {
-        search: `%${search}%`,
-      });
+      query.where('skill.title ILIKE :search', { search: `%${search}%` });
     }
 
     query.orderBy('skill.title', 'DESC');
@@ -84,7 +106,16 @@ export class SkillsService {
       throw new ForbiddenException('Можно обновлять только свои навыки');
     }
 
-    Object.assign(skill, updateSkillDto);
+    const { categoryId, ...rest } = updateSkillDto;
+
+    Object.assign(skill, rest);
+
+    if (categoryId !== undefined) {
+      skill.category = categoryId
+        ? await this.categoriesService.findOne(categoryId)
+        : null;
+    }
+
     return this.skillsRepository.save(skill);
   }
 

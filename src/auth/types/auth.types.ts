@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { UserRole } from 'src/users/entities/user.enums';
+import { UserRole } from 'src/users/enums/user.enums';
 
 export type JwtPayload = {
   sub: string;
@@ -16,6 +16,8 @@ export type AuthRequest = Request & {
 };
 
 export type RefreshRequest = Request & {
-  user: RefreshPayload;
-  token: string;
+  user: {
+    sub: string;
+    refreshToken: string;
+  };
 };

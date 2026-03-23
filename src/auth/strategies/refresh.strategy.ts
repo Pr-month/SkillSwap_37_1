@@ -18,6 +18,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: config.refreshSecret,
+      passReqToCallback: true,
     });
   }
 
@@ -25,7 +26,7 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     const user = await this.usersService.findOne(payload.sub);
 
     const authHeader = req.headers?.authorization;
-    const token =
+    const refreshToken =
       typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
         ? authHeader.slice(7).trim()
         : '';
@@ -35,10 +36,8 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     }
 
     return {
-      user: {
-        sub: payload.sub,
-      },
-      token,
+      sub: payload.sub,
+      refreshToken,
     };
   }
 }
