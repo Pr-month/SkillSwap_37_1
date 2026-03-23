@@ -9,7 +9,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationDto } from './dto/pagination.dto';
-import { PaginatedSkillsResultDto } from './dto/paginated-skills-result.dto';
+import { PaginatedSkillsResponseDto } from './dto/paginated-skills-response.dto';
 import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
@@ -48,13 +48,14 @@ export class SkillsService {
 
   async findAll(
     paginationDto: PaginationDto,
-  ): Promise<PaginatedSkillsResultDto> {
+  ): Promise<PaginatedSkillsResponseDto> {
     const skippedItems = (paginationDto.page - 1) * paginationDto.limit;
     const { page, limit, search } = paginationDto;
 
     const query = this.skillsRepository
       .createQueryBuilder('skill')
-      .leftJoinAndSelect('skill.owner', 'owner');
+      .leftJoinAndSelect('skill.owner', 'owner')
+      .leftJoinAndSelect('skill.category', 'category');
 
     if (search) {
       query.where('skill.title ILIKE :search', { search: `%${search}%` });
