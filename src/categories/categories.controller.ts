@@ -7,13 +7,11 @@ import {
   Param,
   Delete,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { AuthRequest } from 'src/auth/types/auth.types';
 import {
   ApiCreateCategory,
   ApiGetAllCategories,
@@ -30,7 +28,6 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  // мне кажется сюда тоже нужно добавить гарду - @UseGuards(JwtAuthGuard)
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiCreateCategory()
@@ -51,7 +48,8 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  // и сюда тоже можно добавить - @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiUpdateCategory()
   update(
     @Param('id') id: string,
@@ -61,9 +59,10 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiDeleteCategory()
-  remove(@Param('id') id: string, @Req() req: AuthRequest) {
-    return this.categoriesService.remove(id, req.user.role);
+  remove(@Param('id') id: string) {
+    return this.categoriesService.remove(id);
   }
 }

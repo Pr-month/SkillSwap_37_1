@@ -82,7 +82,10 @@ describe('CategoriesService', () => {
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: parent.id },
       });
-      expect(repository.create).toHaveBeenCalledWith({ name: dto.name, parent });
+      expect(repository.create).toHaveBeenCalledWith({
+        name: dto.name,
+        parent,
+      });
       expect(result).toEqual(child);
     });
 
@@ -156,7 +159,9 @@ describe('CategoriesService', () => {
 
     it('должен выбросить NotFoundException если категория не найдена', async () => {
       repository.findOne!.mockResolvedValue(null);
-      await expect(service.findOne('bad-uuid')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('bad-uuid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('должен передать id в текст ошибки', async () => {
@@ -186,12 +191,14 @@ describe('CategoriesService', () => {
       const parent = makeCategory({ id: 'parent-uuid', name: 'Технологии' });
       const withParent = makeCategory({ parent });
 
-      repository.findOne!
-        .mockResolvedValueOnce({ ...existing })
+      repository
+        .findOne!.mockResolvedValueOnce({ ...existing })
         .mockResolvedValueOnce(parent);
       repository.save!.mockResolvedValue(withParent);
 
-      const result = await service.update('uuid-1', { parentId: 'parent-uuid' });
+      const result = await service.update('uuid-1', {
+        parentId: 'parent-uuid',
+      });
 
       expect(result.parent).toEqual(parent);
     });
@@ -230,8 +237,8 @@ describe('CategoriesService', () => {
     });
 
     it('должен выбросить NotFoundException если новый parentId не найден', async () => {
-      repository.findOne!
-        .mockResolvedValueOnce(makeCategory())
+      repository
+        .findOne!.mockResolvedValueOnce(makeCategory())
         .mockResolvedValueOnce(null);
 
       await expect(
@@ -243,36 +250,22 @@ describe('CategoriesService', () => {
   });
 
   describe('remove', () => {
-    it('должен удалить категорию если пользователь admin', async () => {
+    it('должен удалить категорию', async () => {
       const category = makeCategory({ name: 'IT' });
 
       repository.findOne!.mockResolvedValue(category);
       repository.remove!.mockResolvedValue(category);
 
-      const result = await service.remove('uuid-1', 'admin');
+      const result = await service.remove('uuid-1');
 
       expect(repository.remove).toHaveBeenCalledWith(category);
       expect(result).toEqual({ message: 'Категория "IT" успешно удалена' });
     });
 
-    it('должен выбросить ForbiddenException если пользователь не admin', async () => {
-      await expect(service.remove('uuid-1', 'user')).rejects.toThrow(
-        ForbiddenException,
-      );
-      expect(repository.findOne).not.toHaveBeenCalled();
-      expect(repository.remove).not.toHaveBeenCalled();
-    });
-
-    it('должен выбросить ForbiddenException для роли moderator', async () => {
-      await expect(service.remove('uuid-1', 'moderator')).rejects.toThrow(
-        ForbiddenException,
-      );
-    });
-
     it('должен выбросить NotFoundException если категория не найдена', async () => {
       repository.findOne!.mockResolvedValue(null);
 
-      await expect(service.remove('bad-uuid', 'admin')).rejects.toThrow(
+      await expect(service.remove('bad-uuid')).rejects.toThrow(
         NotFoundException,
       );
       expect(repository.remove).not.toHaveBeenCalled();
