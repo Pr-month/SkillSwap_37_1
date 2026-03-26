@@ -23,7 +23,7 @@ import {
 } from './swagger/categories.swagger';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { UserRole } from 'src/users/enums/user.enums';
+import { UserRole } from '../users/enums/user.enums';
 
 @Controller('categories')
 export class CategoriesController {
