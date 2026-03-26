@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -100,18 +96,9 @@ export class CategoriesService {
     return this.categoriesRepository.save(category);
   }
 
-  async remove(id: string, userRole: string) {
-    // Проверка прав администратора
-    if (userRole !== 'admin') {
-      throw new ForbiddenException(
-        'Только администратор может удалять категории',
-      );
-    }
-
+  async remove(id: string) {
     const category = await this.findOne(id);
-
     await this.categoriesRepository.remove(category);
-
     return { message: `Категория "${category.name}" успешно удалена` };
   }
 }

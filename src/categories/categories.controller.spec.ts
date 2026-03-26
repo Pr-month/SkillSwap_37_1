@@ -1,11 +1,9 @@
-import { NotFoundException, ForbiddenException } from "@nestjs/common";
-import { TestingModule, Test } from "@nestjs/testing";
-import { AuthRequest } from "src/auth/types/auth.types";
-import { UserRole } from "src/users/enums/user.enums";
-import { CategoriesController } from "./categories.controller";
-import { CategoriesService } from "./categories.service";
-import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
+import { NotFoundException } from '@nestjs/common';
+import { TestingModule, Test } from '@nestjs/testing';
+import { CategoriesController } from './categories.controller';
+import { CategoriesService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 const mockCategoriesService = () => ({
   create: jest.fn(),
@@ -14,9 +12,6 @@ const mockCategoriesService = () => ({
   update: jest.fn(),
   remove: jest.fn(),
 });
-
-const makeAuthRequest = (role: UserRole): AuthRequest =>
-  ({ user: { id: 'user-uuid', role } }) as unknown as AuthRequest;
 
 describe('CategoriesController', () => {
   let controller: CategoriesController;
@@ -46,7 +41,12 @@ describe('CategoriesController', () => {
   describe('create', () => {
     it('должен вызвать service.create и вернуть результат', async () => {
       const dto: CreateCategoryDto = { name: 'IT и программирование' };
-      const expected = { id: 'uuid-1', name: dto.name, parent: null, children: [] };
+      const expected = {
+        id: 'uuid-1',
+        name: dto.name,
+        parent: null,
+        children: [],
+      };
 
       service.create.mockResolvedValue(expected);
 
@@ -57,7 +57,10 @@ describe('CategoriesController', () => {
     });
 
     it('должен создать дочернюю категорию при наличии parentId', async () => {
-      const dto: CreateCategoryDto = { name: 'Backend', parentId: 'parent-uuid' };
+      const dto: CreateCategoryDto = {
+        name: 'Backend',
+        parentId: 'parent-uuid',
+      };
       const expected = {
         id: 'child-uuid',
         name: dto.name,
@@ -120,14 +123,21 @@ describe('CategoriesController', () => {
         new NotFoundException('Category with ID bad-uuid not found'),
       );
 
-      await expect(controller.findOne('bad-uuid')).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne('bad-uuid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     it('должен обновить категорию и вернуть результат', async () => {
       const dto: UpdateCategoryDto = { name: 'Обновлённое название' };
-      const expected = { id: 'uuid-1', name: dto.name, parent: null, children: [] };
+      const expected = {
+        id: 'uuid-1',
+        name: dto.name,
+        parent: null,
+        children: [],
+      };
 
       service.update.mockResolvedValue(expected);
 
@@ -140,9 +150,9 @@ describe('CategoriesController', () => {
     it('должен пробросить NotFoundException если категория не найдена', async () => {
       service.update.mockRejectedValue(new NotFoundException());
 
-      await expect(controller.update('bad-uuid', { name: 'X' })).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        controller.update('bad-uuid', { name: 'X' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('должен пробросить NotFoundException при невалидном parentId', async () => {
@@ -155,33 +165,23 @@ describe('CategoriesController', () => {
   });
 
   describe('remove', () => {
-    it('должен удалить категорию если пользователь admin', async () => {
+    it('должен удалить категорию', async () => {
       const expected = { message: 'Категория "IT" успешно удалена' };
 
       service.remove.mockResolvedValue(expected);
 
-      const result = await controller.remove('uuid-1', makeAuthRequest(UserRole.ADMIN));
+      const result = await controller.remove('uuid-1');
 
-      expect(service.remove).toHaveBeenCalledWith('uuid-1', UserRole.ADMIN);
+      expect(service.remove).toHaveBeenCalledWith('uuid-1');
       expect(result).toEqual(expected);
-    });
-
-    it('должен пробросить ForbiddenException если пользователь не admin', async () => {
-      service.remove.mockRejectedValue(
-        new ForbiddenException('Только администратор может удалять категории'),
-      );
-
-      await expect(
-        controller.remove('uuid-1', makeAuthRequest(UserRole.USER)),
-      ).rejects.toThrow(ForbiddenException);
     });
 
     it('должен пробросить NotFoundException если категория не найдена', async () => {
       service.remove.mockRejectedValue(new NotFoundException());
 
-      await expect(
-        controller.remove('bad-uuid', makeAuthRequest(UserRole.ADMIN)),
-      ).rejects.toThrow(NotFoundException);
+      await expect(controller.remove('bad-uuid')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
