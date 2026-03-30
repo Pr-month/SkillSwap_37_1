@@ -1,0 +1,3 @@
+[submodule "microservices/emailService"]
+	path = microservices/emailService
+	url = https://github.com/xWarrainx/email-microservice.git
