@@ -6,8 +6,9 @@ import {
   Post,
   Req,
   UseGuards,
-  Request,
+  Request, Get, Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -20,6 +21,7 @@ import {
   ApiLogout,
   ApiRefresh,
 } from './swagger/auth.swagger';
+import { YandexAuthGuard } from 'src/auth/guards/yandex-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -51,5 +53,21 @@ export class AuthController {
   @ApiRefresh()
   async refresh(@Request() req: RefreshRequest) {
     return this.authService.refreshTokens(req.user.sub, req.user.refreshToken);
+  }
+
+  @Get('yandex/login')
+  @UseGuards(YandexAuthGuard)
+  oauthLoginYandex() {}
+
+  @Get('yandex/callback')
+  @UseGuards(YandexAuthGuard)
+  async oauthYandexCallback(@Req() req, @Res() res:Response) {
+    const user = req.user
+
+    const tokens = await this.authService.loginOAuth(user);
+
+    res.redirect(
+      `${process.env.FRONTEND_URL}/oauth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+    );
   }
 }
