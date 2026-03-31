@@ -11,6 +11,7 @@ import {
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedSkillsResponseDto } from './dto/paginated-skills-response.dto';
 import { CategoriesService } from '../categories/categories.service';
+import { FilesService } from '../files/files.service';
 
 @Injectable()
 export class SkillsService {
@@ -18,6 +19,7 @@ export class SkillsService {
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
     private readonly categoriesService: CategoriesService,
+    private readonly filesService: FilesService,
   ) {}
 
   async create(createSkillDto: CreateSkillDto, userId: string): Promise<Skill> {
@@ -131,6 +133,10 @@ export class SkillsService {
 
     if (!skill.owner || skill.owner.id !== userId) {
       throw new ForbiddenException('Можно удалять только свои навыки');
+    }
+
+    if (skill.images && skill.images.length > 0) {
+      await this.filesService.deleteFiles(skill.images);
     }
 
     await this.skillsRepository.remove(skill);

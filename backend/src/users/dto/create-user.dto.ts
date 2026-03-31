@@ -5,7 +5,9 @@ import {
   MinLength,
   IsEnum,
   IsDateString,
-  IsOptional, IsArray, IsUUID,
+  IsOptional,
+  IsArray,
+  IsUUID,
 } from 'class-validator';
 import { Gender } from '../enums/user.enums';
 

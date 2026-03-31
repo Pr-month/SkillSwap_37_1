@@ -126,7 +126,9 @@ describe('AuthService', () => {
     it('должен выбросить ConflictException при дублировании email', async () => {
       usersService.create.mockRejectedValue({ code: '23505' });
 
-      await expect(getService().register(dto)).rejects.toThrow(ConflictException);
+      await expect(getService().register(dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('должен пробросить неизвестную ошибку без изменений', async () => {
@@ -166,7 +168,9 @@ describe('AuthService', () => {
     it('должен выбросить UnauthorizedException если пользователь не найден', async () => {
       usersService.findByEmail.mockResolvedValue(null);
 
-      await expect(getService().login(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(getService().login(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('должен выбросить UnauthorizedException при неверном пароле', async () => {
@@ -176,7 +180,9 @@ describe('AuthService', () => {
 
       usersService.findByEmail.mockResolvedValue(user);
 
-      await expect(getService().login(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(getService().login(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -206,7 +212,10 @@ describe('AuthService', () => {
         .mockResolvedValueOnce('new-refresh-token');
       usersService.updateRefreshToken.mockResolvedValue(undefined);
 
-      const result = await getService().refreshTokens('user-uuid', rawRefreshToken);
+      const result = await getService().refreshTokens(
+        'user-uuid',
+        rawRefreshToken,
+      );
 
       expect(result).toMatchObject({
         accessToken: 'new-access-token',
