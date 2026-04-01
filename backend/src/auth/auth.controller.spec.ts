@@ -7,9 +7,14 @@ import { UserRole, Gender } from '../users/enums/user.enums';
 import { AuthRequest, RefreshRequest } from './types/auth.types';
 
 const makeAuthRequest = (sub: string, role: UserRole): AuthRequest =>
-  ({ user: { sub, email: 'ivan@example.com', role } }) as unknown as AuthRequest;
+  ({
+    user: { sub, email: 'ivan@example.com', role },
+  }) as unknown as AuthRequest;
 
-const makeRefreshRequest = (sub: string, refreshToken: string): RefreshRequest =>
+const makeRefreshRequest = (
+  sub: string,
+  refreshToken: string,
+): RefreshRequest =>
   ({ user: { sub, refreshToken } }) as unknown as RefreshRequest;
 
 describe('AuthController', () => {
@@ -99,7 +104,9 @@ describe('AuthController', () => {
         new UnauthorizedException('Неверный email или пароль'),
       );
 
-      await expect(controller.login(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -119,7 +126,9 @@ describe('AuthController', () => {
 
       serviceMock.logout.mockRejectedValue(new UnauthorizedException());
 
-      await expect(controller.logout(req)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.logout(req)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -147,7 +156,9 @@ describe('AuthController', () => {
 
       serviceMock.refreshTokens.mockRejectedValue(new UnauthorizedException());
 
-      await expect(controller.refresh(req)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.refresh(req)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

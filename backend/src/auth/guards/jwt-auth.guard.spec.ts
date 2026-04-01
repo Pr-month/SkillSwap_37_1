@@ -49,7 +49,9 @@ describe('JwtAuthGuard', () => {
   });
 
   it('should throw UnauthorizedException for invalid token', async () => {
-    jest.spyOn(jwtGuard, 'canActivate').mockRejectedValue(new UnauthorizedException());
+    jest
+      .spyOn(jwtGuard, 'canActivate')
+      .mockRejectedValue(new UnauthorizedException());
 
     const mockContext = {
       switchToHttp: () => ({
