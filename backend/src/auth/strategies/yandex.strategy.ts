@@ -3,6 +3,8 @@ import { YandexConfig, yandexConfig } from 'src/config/yandex-oauth.config';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { Gender } from 'src/users/enums/user.enums';
 
 
 @Injectable()
@@ -23,7 +25,7 @@ export class YandexStrategy extends PassportStrategy(
   }
 
   async validate(accessToken: string, refreshToken: string,
-                 profile: Profile
+                 profile: Profile,
   ) {
 
     const email = profile.emails?.[0]?.value;
@@ -32,11 +34,13 @@ export class YandexStrategy extends PassportStrategy(
       throw new UnauthorizedException('Email не предоставлен Яндексом');
     }
 
-    const userData = {
+    const userData: CreateUserDto = {
       email,
       name: profile.displayName ?? '',
       avatar: profile.photos?.[0]?.value,
       password: '',
+      gender: profile.gender as Gender,
+      birthdate: profile.birthday ?? null,
     };
 
     return await this.authService.validateYandexUser(userData);

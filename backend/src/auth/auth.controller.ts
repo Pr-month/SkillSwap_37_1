@@ -6,7 +6,7 @@ import {
   Post,
   Req,
   UseGuards,
-  Request, Get, Res,
+  Request, Get, Res, Inject,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -22,10 +22,14 @@ import {
   ApiRefresh,
 } from './swagger/auth.swagger';
 import { YandexAuthGuard } from 'src/auth/guards/yandex-auth.guard';
+import { AppConfig, appConfig } from 'src/config/app.config';
+import { OAuthRequest } from 'src/auth/auth.type';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+  @Inject(appConfig.KEY)
+  private readonly appConfig: AppConfig
 
   @Post('register')
   @ApiRegister()
@@ -61,13 +65,13 @@ export class AuthController {
 
   @Get('yandex/callback')
   @UseGuards(YandexAuthGuard)
-  async oauthYandexCallback(@Req() req, @Res() res:Response) {
+  async oauthYandexCallback(@Req() req: OAuthRequest, @Res() res:Response) {
     const user = req.user
 
     const tokens = await this.authService.loginOAuth(user);
 
     res.redirect(
-      `${process.env.FRONTEND_URL}/oauth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
+      `${this.appConfig.frontendUrl}/oauth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
     );
   }
 }
