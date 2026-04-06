@@ -9,7 +9,7 @@ import { WsJwtGuard } from './guards/ws-jwt.guard';
 import { NotificationDbService } from './notification-db.service';
 import { NOTIFICATION_EVENTS } from './constants/notification-events';
 import { NOTIFICATION_MESSAGES } from './constants/notification-messages';
-import { NotificationType } from './entities/notification.entity';
+import { NotificationType } from './enums/notification.enums';
 
 type NotificationPayload = {
   type: 'newRequest' | 'requestAccepted' | 'requestRejected';

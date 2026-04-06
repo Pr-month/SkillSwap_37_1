@@ -7,14 +7,10 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-
-export enum NotificationType {
-  NEW_REQUEST = 'newRequest',
-  REQUEST_ACCEPTED = 'requestAccepted',
-  REQUEST_REJECTED = 'requestRejected',
-}
+import { NotificationType } from '../enums/notification.enums';
 
 @Entity('notifications')
+@Index(['user', 'isRead'])
 export class Notification {
   @PrimaryGeneratedColumn('uuid')
   id: string;

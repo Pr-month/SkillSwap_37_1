@@ -8,5 +8,6 @@ import { File } from './entities/file.entity';
   imports: [TypeOrmModule.forFeature([File])],
   controllers: [FilesController],
   providers: [FilesService],
+  exports: [FilesService],
 })
 export class FilesModule {}

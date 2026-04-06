@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRequest } from '../auth/types/auth.types';
 import { NotificationResponseDto } from './dto/notification-response.dto';
 import { Notification } from './entities/notification.entity';
+import { GetNotificationsDto } from './dto/get-notifications.dto';
 
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
@@ -33,13 +34,12 @@ export class NotificationController {
   @Get()
   async getAll(
     @Request() req: AuthRequest,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 20,
+    @Query() query: GetNotificationsDto,
   ): Promise<{ data: NotificationResponseDto[]; total: number }> {
     const { data, total } = await this.notificationDbService.getAll(
       req.user.sub,
-      page,
-      limit,
+      query.page,
+      query.limit,
     );
     return {
       data: data.map((notification) => this.toResponseDto(notification)),
