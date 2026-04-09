@@ -17,6 +17,7 @@ import { SkillsModule } from './skills/skills.module';
 import { FilesModule } from './files/files.module';
 import { RequestsModule } from './requests/requests.module';
 import { CategoriesModule } from './categories/categories.module';
+import { NotificationModule } from './notification/notification.module';
 import { yandexConfig } from 'src/config/yandex-oauth.config';
 
 @Module({
@@ -56,6 +57,7 @@ import { yandexConfig } from 'src/config/yandex-oauth.config';
     FilesModule,
     RequestsModule,
     CategoriesModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
