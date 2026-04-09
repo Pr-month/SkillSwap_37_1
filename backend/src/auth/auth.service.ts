@@ -14,6 +14,7 @@ import { JwtPayload, RefreshPayload } from './types/auth.types';
 import * as bcrypt from 'bcrypt';
 import { StringValue } from 'ms';
 import { User } from 'src/users/entities/user.entity';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,8 @@ export class AuthService {
     private readonly appConfig: AppConfig,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfig: TJwtConfig,
-  ) {}
+  ) {
+  }
 
   async register(registerDto: RegisterDto) {
     try {
@@ -130,5 +132,20 @@ export class AuthService {
     const tokens = await this.generateTokens(user);
 
     return tokens;
+  }
+
+  async validateYandexUser(dto: CreateUserDto): Promise<User> {
+    const { email } = dto;
+    const user = await this.usersService.findByEmail(email);
+
+    if (user) {
+      return user;
+    }
+
+    return await this.usersService.create(dto);
+  }
+
+  async loginOAuth(user: User) {
+    return this.generateTokens(user);
   }
 }
