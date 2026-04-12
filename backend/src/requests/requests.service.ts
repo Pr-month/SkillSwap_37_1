@@ -6,6 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { Request } from './entities/request.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
@@ -19,6 +22,7 @@ import { NOTIFICATION_MESSAGES } from 'src/notification/constants/notification-m
 
 @Injectable()
 export class RequestsService {
+  private readonly emailServiceUrl: string;
   constructor(
     @InjectRepository(Request)
     private readonly requestsRepository: Repository<Request>,
@@ -27,7 +31,35 @@ export class RequestsService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly notificationsGateway: NotificationsGateway,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.emailServiceUrl = this.configService.get<string>(
+      'EMAIL_SERVICE_URL',
+      'http://localhost:3001',
+    );
+  }
+
+  private async sendEmail(
+    to: string,
+    subject: string,
+    message: string,
+  ): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.httpService.post(`${this.emailServiceUrl}/send-email`, {
+          to,
+          subject,
+          message,
+        }),
+      );
+      console.log(`Email sent to ${to}`);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(`Failed to send email to ${to}:`, errorMessage);
+    }
+  }
 
   async create(senderId: string, dto: CreateRequestDto) {
     const sender = await this.usersRepository.findOne({
@@ -99,6 +131,17 @@ export class RequestsService {
       skillTitle: savedRequest.requestedSkill.title,
       fromUser: savedRequest.sender.name,
     });
+
+    if (savedRequest.receiver?.email) {
+      await this.sendEmail(
+        savedRequest.receiver.email,
+        'Новая заявка на обмен навыками',
+        `Здравствуйте!\n\nПользователь ${savedRequest.sender.name} отправил вам заявку на обмен навыками.\n\n` +
+          `Предлагаемый навык: ${savedRequest.offeredSkill.title}\n` +
+          `Желаемый навык: ${savedRequest.requestedSkill.title}\n\n` +
+          `Перейдите в приложение SkillSwap, чтобы принять или отклонить заявку.`,
+      );
+    }
 
     return savedRequest;
   }
@@ -187,6 +230,16 @@ export class RequestsService {
         skillTitle: request.requestedSkill.title,
         fromUser: request.receiver.name,
       });
+
+      if (request.sender?.email) {
+        await this.sendEmail(
+          request.sender.email,
+          'Ваша заявка принята!',
+          `Здравствуйте!\n\nПользователь ${request.receiver.name} принял вашу заявку на обмен навыками.\n\n` +
+            `Навык: ${request.requestedSkill.title}\n\n` +
+            `Свяжитесь с пользователем для дальнейших договоренностей.`,
+        );
+      }
     }
 
     if (request.status === RequestStatus.REJECTED) {
@@ -195,6 +248,16 @@ export class RequestsService {
         skillTitle: request.requestedSkill.title,
         fromUser: request.receiver.name,
       });
+
+      if (request.sender?.email) {
+        await this.sendEmail(
+          request.sender.email,
+          'Ваша заявка отклонена',
+          `Здравствуйте!\n\nК сожалению, пользователь ${request.receiver.name} отклонил вашу заявку на обмен навыками.\n\n` +
+            `Навык: ${request.requestedSkill.title}\n\n` +
+            `Не расстраивайтесь! Попробуйте найти другой навык для обмена.`,
+        );
+      }
     }
 
     return request;
