@@ -17,6 +17,8 @@ import { SkillsModule } from './skills/skills.module';
 import { FilesModule } from './files/files.module';
 import { RequestsModule } from './requests/requests.module';
 import { CategoriesModule } from './categories/categories.module';
+import { NotificationModule } from './notification/notification.module';
+import { yandexConfig } from 'src/config/yandex-oauth.config';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { CategoriesModule } from './categories/categories.module';
 
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, jwtConfig, dbConfig],
+      load: [appConfig, jwtConfig, dbConfig, yandexConfig],
     }),
 
     TypeOrmModule.forRootAsync({
@@ -55,6 +57,7 @@ import { CategoriesModule } from './categories/categories.module';
     FilesModule,
     RequestsModule,
     CategoriesModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
